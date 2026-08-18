@@ -1,0 +1,597 @@
+/* =========================================
+   GLOBAL DASHBOARD
+========================================= */
+
+.dashboard {
+    min-height: 100vh;
+    background: #f4f7fb;
+    color: #1e293b;
+    font-family:
+            Inter,
+            "Segoe UI",
+            Arial,
+            sans-serif;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.dashboard-header {
+    height: 72px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1d4ed8;
+}
+
+.dashboard-header p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.user-section span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.user-section button {
+    border: none;
+    padding: 9px 16px;
+    border-radius: 8px;
+    background: #1d4ed8;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.user-section button:hover {
+    background: #1e40af;
+}
+
+
+/* =========================================
+   MAIN SECTIONS
+========================================= */
+
+.business-account-section,
+.shipment-section,
+.map-section,
+.create-shipment-form {
+    width: calc(100% - 64px);
+    max-width: 1300px;
+    margin: 24px auto;
+}
+
+
+/* =========================================
+   BUSINESS ACCOUNT
+========================================= */
+
+.business-account-section {
+    background: white;
+    padding: 24px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 5px 20px rgba(15, 23, 42, 0.05);
+}
+
+.business-account-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.business-account-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.business-account-header button,
+.business-account-card button {
+    border: none;
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.business-account-header button:hover {
+    background: #dbeafe;
+}
+
+.business-account-card {
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    padding: 20px;
+    background: #f8fbff;
+}
+
+.business-account-card h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 19px;
+    color: #0f172a;
+}
+
+.business-account-card p {
+    margin: 10px 0;
+    color: #475569;
+}
+
+.business-account-card strong {
+    color: #1e293b;
+}
+
+
+/* =========================================
+   BUSINESS FORM
+========================================= */
+
+.business-account-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.business-account-form > div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.business-account-form label,
+.create-shipment-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.business-account-form input,
+.create-shipment-form input,
+.create-shipment-form textarea,
+.create-shipment-form select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 13px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    outline: none;
+    font-size: 14px;
+    font-family: inherit;
+    background: #ffffff;
+    color: #0f172a;
+    caret-color: #2563eb;
+}
+
+.create-shipment-form input::placeholder,
+.create-shipment-form textarea::placeholder {
+    color: #94a3b8;
+    opacity: 1;
+}
+
+.create-shipment-form input:focus,
+.create-shipment-form textarea:focus,
+.create-shipment-form select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.business-account-form input:focus,
+.create-shipment-form input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.business-form-buttons {
+    grid-column: span 2;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px;
+}
+
+.business-form-buttons button,
+.shipment-form-buttons button {
+    border: none;
+    padding: 11px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.business-form-buttons button:first-child,
+.shipment-form-buttons button:first-child {
+    background: #2563eb;
+    color: white;
+}
+
+.business-form-buttons button:last-child,
+.shipment-form-buttons button:last-child {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+
+/* =========================================
+   STATISTICS
+========================================= */
+
+.stats-container {
+    width: calc(100% - 64px);
+    max-width: 1300px;
+    margin: 24px auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.stat-card {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 5px 20px rgba(15, 23, 42, 0.04);
+}
+
+.stat-card h3 {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-card p {
+    margin: 10px 0 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+
+/* =========================================
+   SHIPMENT HEADER
+========================================= */
+
+.create-shipment-header {
+    width: calc(100% - 64px);
+    max-width: 1300px;
+    margin: 32px auto 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.create-shipment-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.create-shipment-header button {
+    border: none;
+    background: #2563eb;
+    color: white;
+    padding: 11px 18px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.create-shipment-header button:hover {
+    background: #1d4ed8;
+}
+
+
+/* =========================================
+   CREATE SHIPMENT FORM
+========================================= */
+
+.create-shipment-form {
+    background: white;
+    padding: 24px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 5px 20px rgba(15, 23, 42, 0.05);
+}
+
+.create-shipment-form h2 {
+    margin-top: 0;
+}
+
+.create-shipment-form form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.create-shipment-form form > div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.shipment-form-buttons {
+    grid-column: span 2;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px;
+}
+
+
+/* =========================================
+   SHIPMENT LIST
+========================================= */
+
+.shipment-section {
+    background: transparent;
+}
+
+.shipment-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.shipment-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(15, 23, 42, 0.04);
+    transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+.shipment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.shipment-card h3 {
+    margin-top: 0;
+    color: #0f172a;
+    font-size: 16px;
+}
+
+.shipment-card h3 span {
+    color: #2563eb;
+}
+
+.shipment-card p {
+    margin: 9px 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.shipment-card strong {
+    color: #334155;
+}
+
+
+
+/* =========================================
+   ERROR / LOADING / EMPTY
+========================================= */
+
+.error-message {
+    width: calc(100% - 64px);
+    max-width: 1300px;
+    margin: 15px auto;
+    padding: 12px 16px;
+    border-radius: 9px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+
+.loading,
+.no-shipments,
+.no-business-account {
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    color: #64748b;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .shipment-list {
+        grid-template-columns: 1fr;
+    }
+
+    .business-account-form,
+    .create-shipment-form form {
+        grid-template-columns: 1fr;
+    }
+
+    .business-form-buttons,
+    .shipment-form-buttons {
+        grid-column: span 1;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .dashboard-header {
+        height: auto;
+        padding: 18px;
+        gap: 14px;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .user-section {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+
+    .business-account-section,
+    .shipment-section,
+    .map-section,
+    .create-shipment-form,
+    .create-shipment-header,
+    .stats-container,
+    .error-message {
+        width: calc(100% - 30px);
+    }
+
+}
+/* =========================================
+   ADMIN DASHBOARD
+========================================= */
+
+.admin-dashboard-card {
+    width: calc(100% - 64px);
+    max-width: 1300px;
+    margin: 24px auto;
+    padding: 28px;
+    border-radius: 16px;
+
+    background: linear-gradient(
+            135deg,
+            #1d4ed8,
+            #2563eb,
+            #3b82f6
+    );
+
+    color: white;
+
+    box-shadow:
+            0 10px 30px rgba(37, 99, 235, 0.25);
+}
+
+.admin-dashboard-card h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    color: white;
+}
+
+.admin-dashboard-card p {
+    margin: 0 0 20px;
+    color: #dbeafe;
+}
+
+.admin-dashboard-card button {
+    border: none;
+    padding: 11px 20px;
+    border-radius: 9px;
+
+    background: white;
+    color: #1d4ed8;
+
+    font-weight: 700;
+    cursor: pointer;
+
+    transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+.admin-dashboard-card button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+            0 6px 15px rgba(15, 23, 42, 0.2);
+}
+
+
+/* =========================================
+   STAT CARD COLORS
+========================================= */
+
+.stat-card:nth-child(1) {
+    border-top: 4px solid #2563eb;
+}
+
+.stat-card:nth-child(2) {
+    border-top: 4px solid #f59e0b;
+}
+
+.stat-card:nth-child(3) {
+    border-top: 4px solid #16a34a;
+}
+
+.stat-card:nth-child(4) {
+    border-top: 4px solid #8b5cf6;
+}
+
+
+/* =========================================
+   SHIPMENT STATUS COLORS
+========================================= */
+
+.shipment-card p span {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+
+/* =========================================
+   ADMIN / SHIPMENT STATUS CARD
+========================================= */
+
+.shipment-card {
+    border-left: 4px solid #2563eb;
+}
+
+.shipment-card:hover {
+    border-left-color: #1d4ed8;
+}
+
+
+/* =========================================
+   MOBILE ADMIN CARD
+========================================= */
+
+@media (max-width: 600px) {
+
+    .admin-dashboard-card {
+        width: calc(100% - 30px);
+    }
+
+}
