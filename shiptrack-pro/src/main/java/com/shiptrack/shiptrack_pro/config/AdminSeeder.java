@@ -1,27 +1,28 @@
 package com.shiptrack.shiptrack_pro.config;
- 
+
 import com.shiptrack.shiptrack_pro.entity.User;
 import com.shiptrack.shiptrack_pro.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
- 
+
 @Component
 @RequiredArgsConstructor
 public class AdminSeeder implements CommandLineRunner {
- 
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
- 
+
     @Override
     public void run(String... args) {
         String adminEmail = "admin@shiptrack.com";
- 
+
         if (userRepository.existsByEmail(adminEmail)) {
-            return; // already seeded — do nothing on subsequent restarts
+            System.out.println("✅ Admin already exists, skipping seed.");
+            return;
         }
- 
+
         User admin = User.builder()
                 .fullName("System Administrator")
                 .email(adminEmail)
@@ -30,8 +31,11 @@ public class AdminSeeder implements CommandLineRunner {
                 .role("ADMINISTRATOR")
                 .status("ACTIVE")
                 .build();
- 
+
         userRepository.save(admin);
-        System.out.println("Seeded default admin account: " + adminEmail);
+        System.out.println("✅ Seeded default admin account:");
+        System.out.println("   📧 Email: " + adminEmail);
+        System.out.println("   🔑 Password: Admin@123");
+        System.out.println("   ⚠️  Please change this password immediately in production!");
     }
 }
