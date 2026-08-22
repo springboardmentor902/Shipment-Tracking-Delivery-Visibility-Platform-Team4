@@ -19,7 +19,8 @@ public class AdminSeeder implements CommandLineRunner {
         String adminEmail = "admin@shiptrack.com";
 
         if (userRepository.existsByEmail(adminEmail)) {
-            return; // already seeded - do nothing on subsequent restarts
+            System.out.println("✅ Admin already exists, skipping seed.");
+            return;
         }
 
         User admin = User.builder()
@@ -32,6 +33,9 @@ public class AdminSeeder implements CommandLineRunner {
                 .build();
 
         userRepository.save(admin);
-        System.out.println("Seeded default admin account: " + adminEmail);
+        System.out.println("✅ Seeded default admin account:");
+        System.out.println("   📧 Email: " + adminEmail);
+        System.out.println("   🔑 Password: Admin@123");
+        System.out.println("   ⚠️  Please change this password immediately in production!");
     }
 }
