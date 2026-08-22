@@ -667,3 +667,30 @@ export async function updateShipmentStatus(
     return data;
 
 }
+export async function createPackage(packageData) {
+
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+        "http://localhost:8080/api/packages",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(packageData),
+        }
+    );
+
+    if (!response.ok) {
+
+        const errorText = await response.text();
+
+        throw new Error(
+            errorText || "Failed to create package"
+        );
+    }
+
+    return response.json();
+}

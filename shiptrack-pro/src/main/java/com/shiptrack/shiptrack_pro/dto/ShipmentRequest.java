@@ -1,26 +1,84 @@
 package com.shiptrack.shiptrack_pro.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Data
 public class ShipmentRequest {
 
-    @NotBlank(message = "Sender is required")
+    @NotBlank
     private String sender;
 
-    @NotBlank(message = "Receiver is required")
+    @NotBlank
     private String receiver;
 
-    @NotBlank(message = "Origin is required")
+    @NotBlank
     private String origin;
 
-    @NotBlank(message = "Destination is required")
+    @NotBlank
     private String destination;
 
     private String currentLocation;
 
     private LocalDateTime estimatedDelivery;
+
+
+    public ShipmentRequest() {
+    }
+
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+
+    public String getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
+    }
+
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+
+    public String getDestination() {
+        return destination;
+    }
+
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
+
+
+    public String getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public void setCurrentLocation(String currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
+
+    public LocalDateTime getEstimatedDelivery() {
+        return estimatedDelivery;
+    }
+
+    public void setEstimatedDelivery(
+            LocalDateTime estimatedDelivery
+    ) {
+        this.estimatedDelivery = estimatedDelivery;
+    }
 }

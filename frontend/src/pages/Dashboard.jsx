@@ -6,9 +6,9 @@ import {
     getCurrentUser,
     getShipments,
     createShipment,
+    createPackage,
     logoutUser,
 } from "../services/authService";
-
 
 function Dashboard() {
 
@@ -20,28 +20,21 @@ function Dashboard() {
 
     const [user, setUser] = useState(null);
 
-
     // ========================================
     // SHIPMENTS
     // ========================================
 
     const [shipments, setShipments] = useState([]);
-
     const [loading, setLoading] = useState(true);
-
     const [error, setError] = useState("");
-
 
     // ========================================
     // CREATE SHIPMENT
     // ========================================
 
     const [showShipmentForm, setShowShipmentForm] = useState(false);
-
     const [creatingShipment, setCreatingShipment] = useState(false);
-
     const [shipmentError, setShipmentError] = useState("");
-
 
     const [shipmentForm, setShipmentForm] = useState({
         sender: "",
@@ -52,6 +45,20 @@ function Dashboard() {
         estimatedDelivery: "",
     });
 
+    // ========================================
+    // PACKAGE
+    // ========================================
+
+    const [packageForm, setPackageForm] = useState({
+        description: "",
+        weightKg: "",
+        lengthCm: "",
+        widthCm: "",
+        heightCm: "",
+        quantity: 1,
+        declaredValue: "",
+        fragile: false,
+    });
 
     // ========================================
     // INITIAL LOAD
@@ -68,10 +75,6 @@ function Dashboard() {
 
         setUser(currentUser);
 
-        /*
-         * Users who can access shipments.
-         */
-
         if (
             currentUser.role === "CUSTOMER" ||
             currentUser.role === "BUSINESS_CLIENT" ||
@@ -84,7 +87,6 @@ function Dashboard() {
         }
 
     }, [navigate]);
-
 
     // ========================================
     // LOAD SHIPMENTS
@@ -130,7 +132,6 @@ function Dashboard() {
 
     };
 
-
     // ========================================
     // SHIPMENT FORM CHANGE
     // ========================================
@@ -149,9 +150,31 @@ function Dashboard() {
 
     };
 
+    // ========================================
+    // PACKAGE FORM CHANGE
+    // ========================================
+
+    const handlePackageChange = (event) => {
+
+        const {
+            name,
+            value,
+            type,
+            checked
+        } = event.target;
+
+        setPackageForm(previous => ({
+            ...previous,
+            [name]:
+                type === "checkbox"
+                    ? checked
+                    : value,
+        }));
+
+    };
 
     // ========================================
-    // CREATE SHIPMENT
+    // CREATE SHIPMENT + PACKAGE
     // ========================================
 
     const handleCreateShipment = async (event) => {
@@ -162,6 +185,10 @@ function Dashboard() {
 
             setCreatingShipment(true);
             setShipmentError("");
+
+            // ========================================
+            // SHIPMENT DATA
+            // ========================================
 
             const shipmentData = {
 
@@ -178,7 +205,8 @@ function Dashboard() {
                 shipmentForm.destination,
 
                 currentLocation:
-                    shipmentForm.currentLocation || null,
+                    shipmentForm.currentLocation ||
+                    null,
 
                 estimatedDelivery:
                     shipmentForm.estimatedDelivery
@@ -186,13 +214,16 @@ function Dashboard() {
                             shipmentForm.estimatedDelivery
                         ).toISOString()
                         : null,
-
             };
 
             console.log(
                 "Creating shipment:",
                 shipmentData
             );
+
+            // ========================================
+            // CREATE SHIPMENT
+            // ========================================
 
             const createdShipment =
                 await createShipment(
@@ -204,20 +235,112 @@ function Dashboard() {
                 createdShipment
             );
 
+            // ========================================
+            // CHECK SHIPMENT ID
+            // ========================================
+
+            if (!createdShipment?.id) {
+
+                throw new Error(
+                    "Shipment was created but no shipment ID was returned."
+                );
+
+            }
+
+            // ========================================
+            // PACKAGE DATA
+            // ========================================
+
+            const packageData = {
+
+                shipmentId:
+                createdShipment.id,
+
+                description:
+                packageForm.description,
+
+                weightKg:
+                    Number(
+                        packageForm.weightKg
+                    ),
+
+                lengthCm:
+                    Number(
+                        packageForm.lengthCm
+                    ),
+
+                widthCm:
+                    Number(
+                        packageForm.widthCm
+                    ),
+
+                heightCm:
+                    Number(
+                        packageForm.heightCm
+                    ),
+
+                quantity:
+                    Number(
+                        packageForm.quantity
+                    ),
+
+                declaredValue:
+                    Number(
+                        packageForm.declaredValue
+                    ),
+
+                fragile:
+                packageForm.fragile,
+            };
+
+            console.log(
+                "Creating package:",
+                packageData
+            );
+
+            // ========================================
+            // CREATE PACKAGE
+            // ========================================
+
+            await createPackage(
+                packageData
+            );
+
+            // ========================================
+            // UPDATE STATISTICS
+            // ========================================
+
             setShipments(previous => [
                 createdShipment,
                 ...previous,
             ]);
 
-            setShipmentForm({
+            // ========================================
+            // RESET SHIPMENT FORM
+            // ========================================
 
+            setShipmentForm({
                 sender: "",
                 receiver: "",
                 origin: "",
                 destination: "",
                 currentLocation: "",
                 estimatedDelivery: "",
+            });
 
+            // ========================================
+            // RESET PACKAGE FORM
+            // ========================================
+
+            setPackageForm({
+                description: "",
+                weightKg: "",
+                lengthCm: "",
+                widthCm: "",
+                heightCm: "",
+                quantity: 1,
+                declaredValue: "",
+                fragile: false,
             });
 
             setShowShipmentForm(false);
@@ -225,7 +348,7 @@ function Dashboard() {
         } catch (error) {
 
             console.error(
-                "Create shipment error:",
+                "Create shipment/package error:",
                 error
             );
 
@@ -242,7 +365,6 @@ function Dashboard() {
 
     };
 
-
     // ========================================
     // LOGOUT
     // ========================================
@@ -255,14 +377,12 @@ function Dashboard() {
 
     };
 
-
     // ========================================
     // STATISTICS
     // ========================================
 
     const totalShipments =
         shipments.length;
-
 
     const inTransit =
         shipments.filter(
@@ -271,13 +391,11 @@ function Dashboard() {
                 shipment.status === "OUT_FOR_DELIVERY"
         ).length;
 
-
     const delivered =
         shipments.filter(
             shipment =>
                 shipment.status === "DELIVERED"
         ).length;
-
 
     const pending =
         shipments.filter(
@@ -286,7 +404,6 @@ function Dashboard() {
                 shipment.status === "PICKED_UP"
         ).length;
 
-
     // ========================================
     // RENDER
     // ========================================
@@ -294,7 +411,6 @@ function Dashboard() {
     return (
 
         <div className="dashboard">
-
 
             {/* =================================
                 HEADER
@@ -314,22 +430,25 @@ function Dashboard() {
 
                 </div>
 
-
                 <div className="user-section">
 
                     <span>
+
                         Welcome,{" "}
+
                         {
                             user?.fullName ||
                             user?.name ||
                             user?.email ||
                             "User"
                         }
+
                     </span>
 
-
                     <button
-                        onClick={handleLogout}
+                        onClick={
+                            handleLogout
+                        }
                     >
                         Logout
                     </button>
@@ -338,9 +457,8 @@ function Dashboard() {
 
             </div>
 
-
             {/* =================================
-                SHIPMENT DASHBOARD
+                DASHBOARD CONTENT
             ================================= */}
 
             {(
@@ -352,10 +470,7 @@ function Dashboard() {
 
                 <>
 
-
-                    {/* =================================
-                        GENERAL ERROR
-                    ================================= */}
+                    {/* GENERAL ERROR */}
 
                     {error && (
 
@@ -364,7 +479,6 @@ function Dashboard() {
                         </div>
 
                     )}
-
 
                     {/* =================================
                         STATISTICS
@@ -379,11 +493,14 @@ function Dashboard() {
                             </h3>
 
                             <p>
-                                {totalShipments}
+                                {
+                                    loading
+                                        ? "..."
+                                        : totalShipments
+                                }
                             </p>
 
                         </div>
-
 
                         <div className="stat-card">
 
@@ -392,11 +509,14 @@ function Dashboard() {
                             </h3>
 
                             <p>
-                                {inTransit}
+                                {
+                                    loading
+                                        ? "..."
+                                        : inTransit
+                                }
                             </p>
 
                         </div>
-
 
                         <div className="stat-card">
 
@@ -405,11 +525,14 @@ function Dashboard() {
                             </h3>
 
                             <p>
-                                {delivered}
+                                {
+                                    loading
+                                        ? "..."
+                                        : delivered
+                                }
                             </p>
 
                         </div>
-
 
                         <div className="stat-card">
 
@@ -418,49 +541,66 @@ function Dashboard() {
                             </h3>
 
                             <p>
-                                {pending}
+                                {
+                                    loading
+                                        ? "..."
+                                        : pending
+                                }
                             </p>
 
                         </div>
 
                     </div>
 
-
                     {/* =================================
-                        SHIPMENT HEADER
+                        SHIPMENT ACTIONS
                     ================================= */}
 
                     <div className="create-shipment-header">
 
                         <h2>
-                            My Shipments
+                            Shipment Overview
                         </h2>
 
+                        <button
+                            onClick={() =>
+                                navigate(
+                                    "/shipments"
+                                )
+                            }
+                        >
+                            View My Shipments
+                        </button>
 
-                        {user?.role === "BUSINESS_CLIENT" && (
+                        {user?.role ===
+                            "BUSINESS_CLIENT" && (
 
-                            <button
-                                onClick={() => {
+                                <button
+                                    onClick={() => {
 
-                                    setShowShipmentForm(true);
+                                        setShowShipmentForm(
+                                            true
+                                        );
 
-                                    setShipmentError("");
+                                        setShipmentError(
+                                            ""
+                                        );
 
-                                }}
-                            >
-                                + Create Shipment
-                            </button>
+                                    }}
+                                >
+                                    + Create Shipment
+                                </button>
 
-                        )}
+                            )}
 
                     </div>
-
 
                     {/* =================================
                         CREATE SHIPMENT FORM
                     ================================= */}
 
-                    {user?.role === "BUSINESS_CLIENT" &&
+                    {user?.role ===
+                        "BUSINESS_CLIENT" &&
                         showShipmentForm && (
 
                             <div className="create-shipment-form">
@@ -469,23 +609,21 @@ function Dashboard() {
                                     Create New Shipment
                                 </h2>
 
-
                                 {shipmentError && (
 
                                     <div className="error-message">
-
                                         {shipmentError}
-
                                     </div>
 
                                 )}
-
 
                                 <form
                                     onSubmit={
                                         handleCreateShipment
                                     }
                                 >
+
+                                    {/* SENDER */}
 
                                     <div>
 
@@ -508,6 +646,7 @@ function Dashboard() {
 
                                     </div>
 
+                                    {/* RECEIVER */}
 
                                     <div>
 
@@ -530,6 +669,7 @@ function Dashboard() {
 
                                     </div>
 
+                                    {/* ORIGIN */}
 
                                     <div>
 
@@ -552,6 +692,7 @@ function Dashboard() {
 
                                     </div>
 
+                                    {/* DESTINATION */}
 
                                     <div>
 
@@ -574,6 +715,7 @@ function Dashboard() {
 
                                     </div>
 
+                                    {/* CURRENT LOCATION */}
 
                                     <div>
 
@@ -595,6 +737,7 @@ function Dashboard() {
 
                                     </div>
 
+                                    {/* ESTIMATED DELIVERY */}
 
                                     <div>
 
@@ -615,6 +758,214 @@ function Dashboard() {
 
                                     </div>
 
+                                    {/* =================================
+                                        PACKAGE DETAILS
+                                    ================================= */}
+
+                                    <div className="package-section">
+
+                                        <h3>
+                                            Package Details
+                                        </h3>
+
+                                        {/* DESCRIPTION */}
+
+                                        <div>
+
+                                            <label>
+                                                Description
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="description"
+                                                value={
+                                                    packageForm.description
+                                                }
+                                                onChange={
+                                                    handlePackageChange
+                                                }
+                                                placeholder="e.g. Electronics"
+                                                required
+                                            />
+
+                                        </div>
+
+                                        {/* WEIGHT */}
+
+                                        <div>
+
+                                            <label>
+                                                Weight (kg)
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="weightKg"
+                                                value={
+                                                    packageForm.weightKg
+                                                }
+                                                onChange={
+                                                    handlePackageChange
+                                                }
+                                                placeholder="e.g. 2.5"
+                                                min="0"
+                                                step="0.01"
+                                                required
+                                            />
+
+                                        </div>
+
+                                        {/* LENGTH */}
+
+                                        <div>
+
+                                            <label>
+                                                Length (cm)
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="lengthCm"
+                                                value={
+                                                    packageForm.lengthCm
+                                                }
+                                                onChange={
+                                                    handlePackageChange
+                                                }
+                                                placeholder="e.g. 30"
+                                                min="0"
+                                                step="0.01"
+                                                required
+                                            />
+
+                                        </div>
+
+                                        {/* WIDTH */}
+
+                                        <div>
+
+                                            <label>
+                                                Width (cm)
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="widthCm"
+                                                value={
+                                                    packageForm.widthCm
+                                                }
+                                                onChange={
+                                                    handlePackageChange
+                                                }
+                                                placeholder="e.g. 20"
+                                                min="0"
+                                                step="0.01"
+                                                required
+                                            />
+
+                                        </div>
+
+                                        {/* HEIGHT */}
+
+                                        <div>
+
+                                            <label>
+                                                Height (cm)
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="heightCm"
+                                                value={
+                                                    packageForm.heightCm
+                                                }
+                                                onChange={
+                                                    handlePackageChange
+                                                }
+                                                placeholder="e.g. 10"
+                                                min="0"
+                                                step="0.01"
+                                                required
+                                            />
+
+                                        </div>
+
+                                        {/* QUANTITY */}
+
+                                        <div>
+
+                                            <label>
+                                                Quantity
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="quantity"
+                                                value={
+                                                    packageForm.quantity
+                                                }
+                                                onChange={
+                                                    handlePackageChange
+                                                }
+                                                min="1"
+                                                required
+                                            />
+
+                                        </div>
+
+                                        {/* DECLARED VALUE */}
+
+                                        <div>
+
+                                            <label>
+                                                Declared Value
+                                            </label>
+
+                                            <input
+                                                type="number"
+                                                name="declaredValue"
+                                                value={
+                                                    packageForm.declaredValue
+                                                }
+                                                onChange={
+                                                    handlePackageChange
+                                                }
+                                                placeholder="e.g. 15000"
+                                                min="0"
+                                                step="0.01"
+                                                required
+                                            />
+
+                                        </div>
+
+                                        {/* FRAGILE */}
+
+                                        <div>
+
+                                            <label>
+
+                                                <input
+                                                    type="checkbox"
+                                                    name="fragile"
+                                                    checked={
+                                                        packageForm.fragile
+                                                    }
+                                                    onChange={
+                                                        handlePackageChange
+                                                    }
+                                                />
+
+                                                {" "}
+                                                Fragile
+
+                                            </label>
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* FORM BUTTONS */}
 
                                     <div className="shipment-form-buttons">
 
@@ -624,13 +975,14 @@ function Dashboard() {
                                                 creatingShipment
                                             }
                                         >
+
                                             {
                                                 creatingShipment
                                                     ? "Creating..."
                                                     : "Create Shipment"
                                             }
-                                        </button>
 
+                                        </button>
 
                                         <button
                                             type="button"
@@ -640,7 +992,9 @@ function Dashboard() {
                                                     false
                                                 );
 
-                                                setShipmentError("");
+                                                setShipmentError(
+                                                    ""
+                                                );
 
                                             }}
                                             disabled={
@@ -658,185 +1012,6 @@ function Dashboard() {
 
                         )}
 
-
-                    {/* =================================
-                        SHIPMENTS
-                    ================================= */}
-
-                    <div className="shipment-section">
-
-                        {loading ? (
-
-                            <div className="loading">
-
-                                <p>
-                                    Loading shipments...
-                                </p>
-
-                            </div>
-
-                        ) : error ? (
-
-                            <div className="error-message">
-
-                                {error}
-
-                            </div>
-
-                        ) : shipments.length === 0 ? (
-
-                            <div className="no-shipments">
-
-                                <p>
-                                    No shipments found.
-                                </p>
-
-                            </div>
-
-                        ) : (
-
-                            <div className="shipment-list">
-
-                                {shipments.map(
-                                    shipment => (
-
-                                        <div
-                                            className="shipment-card"
-                                            key={
-                                                shipment.id
-                                            }
-                                            onClick={() =>
-                                                navigate(
-                                                    "/shipments/" +
-                                                    shipment.id
-                                                )
-                                            }
-                                            style={{
-                                                cursor: "pointer"
-                                            }}
-                                        >
-
-                                            <h3>
-
-                                                Tracking Number:{" "}
-
-                                                <span>
-                                                    {
-                                                        shipment.trackingNumber
-                                                    }
-                                                </span>
-
-                                            </h3>
-
-
-                                            <p>
-
-                                                <strong>
-                                                    From:
-                                                </strong>{" "}
-
-                                                {
-                                                    shipment.origin
-                                                }
-
-                                            </p>
-
-
-                                            <p>
-
-                                                <strong>
-                                                    To:
-                                                </strong>{" "}
-
-                                                {
-                                                    shipment.destination
-                                                }
-
-                                            </p>
-
-
-                                            <p>
-
-                                                <strong>
-                                                    Current Location:
-                                                </strong>{" "}
-
-                                                {
-                                                    shipment.currentLocation ||
-                                                    "Not available"
-                                                }
-
-                                            </p>
-
-
-                                            <p>
-
-                                                <strong>
-                                                    Status:
-                                                </strong>{" "}
-
-                                                <span>
-                                                    {
-                                                        shipment.status
-                                                    }
-                                                </span>
-
-                                            </p>
-
-
-                                            <p>
-
-                                                <strong>
-                                                    Sender:
-                                                </strong>{" "}
-
-                                                {
-                                                    shipment.sender
-                                                }
-
-                                            </p>
-
-
-                                            <p>
-
-                                                <strong>
-                                                    Receiver:
-                                                </strong>{" "}
-
-                                                {
-                                                    shipment.receiver
-                                                }
-
-                                            </p>
-
-
-                                            <p>
-
-                                                <strong>
-                                                    Estimated Delivery:
-                                                </strong>{" "}
-
-                                                {
-                                                    shipment.estimatedDelivery
-                                                        ? new Date(
-                                                            shipment.estimatedDelivery
-                                                        ).toLocaleString()
-                                                        : "Not available"
-                                                }
-
-                                            </p>
-
-                                        </div>
-
-                                    )
-                                )}
-
-                            </div>
-
-                        )}
-
-                    </div>
-
                 </>
 
             )}
@@ -845,6 +1020,5 @@ function Dashboard() {
 
     );
 }
-
 
 export default Dashboard;

@@ -88,42 +88,106 @@ public class ShipmentServiceImpl implements ShipmentService {
 
 
     // =========================================================
-    // GET SHIPMENTS
-    // =========================================================
+// GET SHIPMENTS
+// =========================================================
+
 
     @Override
-    @Transactional(readOnly = true)
-    public List<ShipmentResponse> getAllShipments(
+    public List<ShipmentResponse> getAllShipments(String userEmail) {
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found")
+                );
+
+        String role = user.getRole();
+
+        List<Shipment> shipments;
+
+        if ("ADMINISTRATOR".equalsIgnoreCase(role)
+                || "ADMIN".equalsIgnoreCase(role)) {
+
+            // ADMIN → all shipments
+            shipments = shipmentRepository.findAll();
+
+        } else if ("LOGISTICS_OPERATOR".equalsIgnoreCase(role)
+                || "OPERATOR".equalsIgnoreCase(role)) {
+
+            // OPERATOR → only assigned shipments
+            shipments =
+                    shipmentRepository.findByAssignedOperatorId(
+                            user.getId()
+                    );
+
+        } else {
+
+            // CUSTOMER / BUSINESS CLIENT → only their shipments
+            shipments =
+                    shipmentRepository.findByUserId(
+                            user.getId()
+                    );
+        }
+
+        return shipments.stream()
+                .map(this::convertToResponse)
+                .toList();
+    }
+    // =========================================================
+// ASSIGN OPERATOR
+// =========================================================
+
+    @Override
+    public ShipmentResponse assignOperator(
+            Long shipmentId,
+            Long operatorId,
             String userEmail
     ) {
 
-        User user = getUserByEmail(userEmail);
+        User admin = getUserByEmail(userEmail);
 
-        /*
-         * Business clients/customers:
-         * return only their own shipments.
-         *
-         * Logistics operators/admins:
-         * return all shipments for operational visibility.
-         */
+        // Only administrator can assign operators
+        if (!isRole(admin, "ADMINISTRATOR")) {
 
-        if (isRole(user, "ADMINISTRATOR") ||
-                isRole(user, "LOGISTICS_OPERATOR")) {
-
-            return shipmentRepository.findAll()
-                    .stream()
-                    .map(this::convertToResponse)
-                    .collect(Collectors.toList());
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only administrators can assign operators"
+            );
         }
 
-        return shipmentRepository
-                .findByUserId(user.getId())
-                .stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
+        Shipment shipment =
+                shipmentRepository.findById(shipmentId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Shipment not found"
+                                )
+                        );
+
+        User operator =
+                userRepository.findById(operatorId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Operator not found"
+                                )
+                        );
+
+        // Make sure selected user is actually an operator
+        if (!isRole(operator, "LOGISTICS_OPERATOR")) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Selected user is not a logistics operator"
+            );
+        }
+
+        shipment.setAssignedOperator(operator);
+
+        Shipment savedShipment =
+                shipmentRepository.save(shipment);
+
+        return convertToResponse(savedShipment);
     }
-
-
     // =========================================================
     // GET SHIPMENT BY ID
     // =========================================================
@@ -388,22 +452,16 @@ public class ShipmentServiceImpl implements ShipmentService {
     }
 
 
-    // =========================================================
-    // FIND SHIPMENT FOR MODIFICATION
-    // =========================================================
-
     private Shipment findShipmentForModification(
             Long id,
             User user
     ) {
 
-        /*
-         * Admins and logistics operators can
-         * operate on any shipment.
-         */
+        // =====================================================
+        // ADMIN → ANY SHIPMENT
+        // =====================================================
 
-        if (isRole(user, "ADMINISTRATOR") ||
-                isRole(user, "LOGISTICS_OPERATOR")) {
+        if (isRole(user, "ADMINISTRATOR")) {
 
             return shipmentRepository
                     .findById(id)
@@ -415,10 +473,30 @@ public class ShipmentServiceImpl implements ShipmentService {
                     );
         }
 
-        /*
-         * Customers/business clients can only
-         * modify their own shipment.
-         */
+
+        // =====================================================
+        // LOGISTICS OPERATOR → ASSIGNED SHIPMENT ONLY
+        // =====================================================
+
+        if (isRole(user, "LOGISTICS_OPERATOR")) {
+
+            return shipmentRepository
+                    .findByIdAndAssignedOperatorId(
+                            id,
+                            user.getId()
+                    )
+                    .orElseThrow(() ->
+                            new ResponseStatusException(
+                                    HttpStatus.NOT_FOUND,
+                                    "Shipment not found or not assigned to you"
+                            )
+                    );
+        }
+
+
+        // =====================================================
+        // CUSTOMER / BUSINESS CLIENT → OWN SHIPMENT
+        // =====================================================
 
         return shipmentRepository
                 .findByIdAndUserId(
@@ -432,8 +510,6 @@ public class ShipmentServiceImpl implements ShipmentService {
                         )
                 );
     }
-
-
     // =========================================================
     // ROLE CHECK
     // =========================================================

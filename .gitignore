@@ -31,3 +31,6 @@ uploads/
 
 # Spring Boot configuration with secrets
 shiptrack-pro/src/main/resources/application.properties
+
+postman/
+.postman/

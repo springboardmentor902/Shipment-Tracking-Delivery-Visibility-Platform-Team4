@@ -38,4 +38,10 @@ public interface ShipmentService {
             Long id,
             String userEmail
     );
+
+    ShipmentResponse assignOperator(
+            Long shipmentId,
+            Long operatorId,
+            String userEmail
+    );
 }

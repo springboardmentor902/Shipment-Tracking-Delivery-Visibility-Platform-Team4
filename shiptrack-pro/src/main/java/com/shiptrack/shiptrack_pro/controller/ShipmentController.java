@@ -203,4 +203,32 @@ public class ShipmentController {
                 response
         );
     }
+    // =========================================================
+// ASSIGN OPERATOR
+// =========================================================
+
+    @PatchMapping("/{id}/assign-operator")
+    public ResponseEntity<ShipmentResponse> assignOperator(
+
+            @PathVariable
+            Long id,
+
+            @RequestParam
+            Long operatorId,
+
+            Authentication authentication
+
+    ) {
+
+        String userEmail =
+                authentication.getName();
+
+        return ResponseEntity.ok(
+                shipmentService.assignOperator(
+                        id,
+                        operatorId,
+                        userEmail
+                )
+        );
+    }
 }

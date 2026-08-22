@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
+
+	<!-- ===================================================== -->
+	<!-- SPRING BOOT -->
+	<!-- ===================================================== -->
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -12,64 +17,123 @@
 		<relativePath/>
 	</parent>
 
+
+	<!-- ===================================================== -->
+	<!-- PROJECT -->
+	<!-- ===================================================== -->
+
 	<groupId>com.shiptrack</groupId>
+
 	<artifactId>shiptrack-pro</artifactId>
+
 	<version>0.0.1-SNAPSHOT</version>
 
 	<name>shiptrack-pro</name>
-	<description>Shipment Tracking and Delivery Visibility Platform</description>
+
+	<description>
+		Shipment Tracking and Delivery Visibility Platform
+	</description>
+
+
+	<!-- ===================================================== -->
+	<!-- PROPERTIES -->
+	<!-- ===================================================== -->
 
 	<properties>
+
 		<java.version>21</java.version>
+
+		<maven.compiler.release>21</maven.compiler.release>
+
 		<lombok.version>1.18.46</lombok.version>
+
+		<jjwt.version>0.12.6</jjwt.version>
+
 	</properties>
+
+
+	<!-- ===================================================== -->
+	<!-- DEPENDENCIES -->
+	<!-- ===================================================== -->
 
 	<dependencies>
 
-		<!-- WEB -->
+
+		<!-- ================================================= -->
+		<!-- SPRING WEB -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<!-- JPA -->
+
+		<!-- ================================================= -->
+		<!-- SPRING DATA JPA -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
-		<!-- SECURITY -->
+
+		<!-- ================================================= -->
+		<!-- SPRING SECURITY -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+
+		<!-- ================================================= -->
 		<!-- VALIDATION -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
+
+		<!-- ================================================= -->
 		<!-- WEBSOCKET -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 
-		<!-- OAUTH2 -->
+
+		<!-- ================================================= -->
+		<!-- OAUTH2 CLIENT -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 
+
+		<!-- ================================================= -->
 		<!-- POSTGRESQL -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
+
+		<!-- ================================================= -->
 		<!-- LOMBOK -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -77,28 +141,46 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- JWT -->
+
+		<!-- ================================================= -->
+		<!-- JWT API -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
-			<version>0.12.6</version>
+			<version>${jjwt.version}</version>
 		</dependency>
+
+
+		<!-- ================================================= -->
+		<!-- JWT IMPLEMENTATION -->
+		<!-- ================================================= -->
 
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-impl</artifactId>
-			<version>0.12.6</version>
+			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+
+
+		<!-- ================================================= -->
+		<!-- JWT JACKSON -->
+		<!-- ================================================= -->
 
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-jackson</artifactId>
-			<version>0.12.6</version>
+			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 
+
+		<!-- ================================================= -->
 		<!-- DEVTOOLS -->
+		<!-- ================================================= -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -106,69 +188,106 @@
 			<optional>true</optional>
 		</dependency>
 
+
+		<!-- ================================================= -->
 		<!-- TEST -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+		<!-- ================================================= -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security-test</artifactId>
+			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
+
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-validation-test</artifactId>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-webmvc-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-websocket-test</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 	</dependencies>
 
+
+	<!-- ===================================================== -->
+	<!-- BUILD -->
+	<!-- ===================================================== -->
+
 	<build>
+
 		<plugins>
 
+
+			<!-- ============================================= -->
 			<!-- MAVEN COMPILER -->
+			<!-- ============================================= -->
+
 			<plugin>
+
 				<groupId>org.apache.maven.plugins</groupId>
+
 				<artifactId>maven-compiler-plugin</artifactId>
+
 				<version>3.15.0</version>
 
 				<configuration>
+
 					<release>21</release>
-					<proc>full</proc>
+
+					<parameters>true</parameters>
 
 					<annotationProcessorPaths>
+
 						<path>
+
 							<groupId>org.projectlombok</groupId>
+
 							<artifactId>lombok</artifactId>
+
 							<version>${lombok.version}</version>
+
 						</path>
+
 					</annotationProcessorPaths>
+
 				</configuration>
+
 			</plugin>
 
-			<!-- SPRING BOOT -->
+
+			<!-- ============================================= -->
+			<!-- SPRING BOOT MAVEN PLUGIN -->
+			<!-- ============================================= -->
+
 			<plugin>
+
 				<groupId>org.springframework.boot</groupId>
+
 				<artifactId>spring-boot-maven-plugin</artifactId>
+
+				<configuration>
+
+					<excludes>
+
+						<exclude>
+
+							<groupId>org.projectlombok</groupId>
+
+							<artifactId>lombok</artifactId>
+
+						</exclude>
+
+					</excludes>
+
+				</configuration>
+
 			</plugin>
+
 
 		</plugins>
+
 	</build>
+
 
 </project>

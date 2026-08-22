@@ -11,7 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ShipmentDetail from "./pages/ShipmentDetail";
-
+import Shipments from "./pages/Shipments";
 function ProtectedRoute({ children }) {
 
     const token = localStorage.getItem("token");
@@ -65,6 +65,14 @@ function App() {
                             to="/login"
                             replace
                         />
+                    }
+                />
+                <Route
+                    path="/shipments"
+                    element={
+                        <ProtectedRoute>
+                            <Shipments />
+                        </ProtectedRoute>
                     }
                 />
 
