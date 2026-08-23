@@ -694,3 +694,99 @@ export async function createPackage(packageData) {
 
     return response.json();
 }
+// ========================================
+// GET ETA PREDICTION
+// ========================================
+
+export async function getETAPrediction(shipmentId) {
+
+    const token = getToken();
+
+    if (!token) {
+        throw new Error("You are not logged in.");
+    }
+
+    const response = await fetch(
+        `${API_URL}/eta/${shipmentId}`,
+        {
+            method: "GET",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        }
+    );
+
+    const text = await response.text();
+
+    let data = {};
+
+    if (text) {
+        try {
+            data = JSON.parse(text);
+        } catch {
+            console.log("ETA API response:", text);
+        }
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            data.error ||
+            text ||
+            `Failed to fetch ETA (${response.status})`
+        );
+    }
+
+    return data;
+}
+
+
+// ========================================
+// PREDICT / RECALCULATE ETA
+// ========================================
+
+export async function predictETA(shipmentId) {
+
+    const token = getToken();
+
+    if (!token) {
+        throw new Error("You are not logged in.");
+    }
+
+    const response = await fetch(
+        `${API_URL}/eta/${shipmentId}/predict`,
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        }
+    );
+
+    const text = await response.text();
+
+    let data = {};
+
+    if (text) {
+        try {
+            data = JSON.parse(text);
+        } catch {
+            console.log("ETA prediction response:", text);
+        }
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            data.error ||
+            text ||
+            `Failed to calculate ETA (${response.status})`
+        );
+    }
+
+    return data;
+}
