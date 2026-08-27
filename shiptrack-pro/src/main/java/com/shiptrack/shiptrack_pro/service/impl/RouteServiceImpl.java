@@ -20,27 +20,50 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public Route createRoute(Long shipmentId, Long driverId, String originAddress, String destinationAddress) {
 
-        // Step 1: convert both addresses into coordinates
-        double[] originCoords = mapService.geocodeAddress(originAddress);
-        double[] destinationCoords = mapService.geocodeAddress(destinationAddress);
+        BigDecimal distanceKm = null;
+        Integer estimatedTimeMinutes = null;
 
-        // Step 2: get real driving distance and time between them
-        Map<String, Object> distanceResult = mapService.getDistanceAndDuration(
-                originCoords[0], originCoords[1],
-                destinationCoords[0], destinationCoords[1]
-        );
+        try {
+            double[] originCoords = mapService.geocodeAddress(originAddress);
+            double[] destinationCoords = mapService.geocodeAddress(destinationAddress);
 
-        // Step 3: build the Route with real calculated values
+            Map<String, Object> distanceResult = mapService.getDistanceAndDuration(
+                    originCoords[0], originCoords[1],
+                    destinationCoords[0], destinationCoords[1]
+            );
+
+            distanceKm = (BigDecimal) distanceResult.get("distanceKm");
+            estimatedTimeMinutes = (Integer) distanceResult.get("estimatedTimeMinutes");
+
+        } catch (Exception e) {
+            // Maps API failed (geocoding or distance lookup) — log it, but don't block route creation
+            System.err.println("Map service failed for route creation: " + e.getMessage());
+        }
+
         Route route = Route.builder()
                 .shipmentId(shipmentId)
                 .driverId(driverId)
                 .origin(originAddress)
                 .destination(destinationAddress)
-                .distanceKm((BigDecimal) distanceResult.get("distanceKm"))
-                .estimatedTimeMinutes((Integer) distanceResult.get("estimatedTimeMinutes"))
+                .distanceKm(distanceKm)
+                .estimatedTimeMinutes(estimatedTimeMinutes)
                 .build();
 
-        // Step 4: save it to the routes table
+        return routeRepository.save(route);
+    }
+
+    @Override
+    public Route getRouteByShipmentId(Long shipmentId) {
+        return routeRepository.findByShipmentId(shipmentId)
+                .orElseThrow(() -> new RuntimeException("No route found for shipment id: " + shipmentId));
+    }
+
+    @Override
+    public Route assignDriver(Long shipmentId, Long driverId) {
+        Route route = routeRepository.findByShipmentId(shipmentId)
+                .orElseThrow(() -> new RuntimeException("No route found for shipment id: " + shipmentId));
+
+        route.setDriverId(driverId);
         return routeRepository.save(route);
     }
 }
