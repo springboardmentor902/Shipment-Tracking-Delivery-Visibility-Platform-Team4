@@ -2,9 +2,7 @@ package com.shiptrack.shiptrack_pro.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,34 +17,35 @@ public class Route {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "shipment_id", nullable = false)
-    private Long shipmentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipment_id", nullable = false)
+    private Shipment shipment;
 
-    @Column(name = "driver_id")
-    private Long driverId;
-
-    @Column(name = "origin")
+    @Column(name = "origin", nullable = false)
     private String origin;
 
-    @Column(name = "destination")
+    @Column(name = "destination", nullable = false)
     private String destination;
 
-    @Column(name = "waypoints", columnDefinition = "TEXT")
-    private String waypoints;  //intermediate point
+    @Column(name = "route_name")
+    private String routeName;
 
-    @Column(name = "distance_km", precision = 10, scale = 2)
-    private BigDecimal distanceKm;
+    @Column(name = "distance_km")
+    private Double distanceKm;
 
-    @Column(name = "estimated_time_minutes")
-    private Integer estimatedTimeMinutes;
+    @Column(name = "estimated_duration_minutes")
+    private Integer estimatedDurationMinutes;
 
-    @Column(name = "actual_time_minutes")
-    private Integer actualTimeMinutes;
+    @Column(name = "assigned_by")
+    private String assignedBy;
 
-    @Column(name = "traffic_condition")
-    private String trafficCondition; //not yet implemented
-
-    @CreationTimestamp  //a Hibernate-specific annotation
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

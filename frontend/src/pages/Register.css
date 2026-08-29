@@ -1,0 +1,551 @@
+/* =========================================
+   REGISTER PAGE
+========================================= */
+
+.register-page {
+    min-height: 100vh;
+    background:
+            linear-gradient(
+                    135deg,
+                    #eff6ff 0%,
+                    #f8fafc 50%,
+                    #eef2ff 100%
+            );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px 20px;
+
+    font-family:
+            Inter,
+            "Segoe UI",
+            Arial,
+            sans-serif;
+
+    color: #1e293b;
+}
+
+
+/* =========================================
+   MAIN CONTAINER
+========================================= */
+
+.register-container {
+    width: 100%;
+    max-width: 1100px;
+
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+
+    background: white;
+
+    border-radius: 22px;
+
+    overflow: hidden;
+
+    box-shadow:
+            0 25px 70px rgba(15, 23, 42, 0.12);
+}
+
+
+/* =========================================
+   LEFT INFO SECTION
+========================================= */
+
+.register-info {
+    padding: 50px 42px;
+
+    background:
+            linear-gradient(
+                    145deg,
+                    #1d4ed8,
+                    #2563eb 55%,
+                    #3b82f6
+            );
+
+    color: white;
+}
+
+
+.register-brand {
+    display: inline-block;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    padding: 8px 12px;
+
+    border-radius: 8px;
+
+    margin-bottom: 26px;
+}
+
+
+.register-info h1 {
+    margin: 0;
+
+    font-size: 34px;
+    line-height: 1.15;
+
+    font-weight: 800;
+}
+
+
+.register-info > p {
+    margin-top: 18px;
+
+    color: #dbeafe;
+
+    line-height: 1.7;
+
+    font-size: 15px;
+}
+
+
+/* =========================================
+   ROLE INFO
+========================================= */
+
+.role-info {
+    margin-top: 35px;
+}
+
+
+.role-info h3 {
+    margin: 0 0 16px;
+
+    font-size: 16px;
+}
+
+
+.role-info-item {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+
+    padding: 13px 0;
+
+    border-bottom:
+            1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+.role-info-item:last-child {
+    border-bottom: none;
+}
+
+
+.role-info-item strong {
+    font-size: 14px;
+}
+
+
+.role-info-item span {
+    color: #dbeafe;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   ADMIN NOTE
+========================================= */
+
+.admin-note {
+    margin-top: 28px;
+
+    padding: 15px 16px;
+
+    border-radius: 12px;
+
+    background:
+            rgba(255, 255, 255, 0.1);
+
+    border:
+            1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+.admin-note strong {
+    font-size: 14px;
+}
+
+
+.admin-note p {
+    margin: 7px 0 0;
+
+    color: #dbeafe;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   REGISTER CARD
+========================================= */
+
+.register-card {
+    padding: 46px 44px;
+
+    background: #ffffff;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.register-header {
+    margin-bottom: 25px;
+}
+
+
+.register-header h2 {
+    margin: 0;
+
+    font-size: 28px;
+
+    color: #0f172a;
+}
+
+
+.register-header p {
+    margin: 8px 0 0;
+
+    color: #64748b;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.register-form {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 17px;
+}
+
+
+.form-group {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+}
+
+
+.form-group label {
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: #334155;
+}
+
+
+.form-group input,
+.form-group select {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 12px 14px;
+
+    border:
+            1px solid #cbd5e1;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #0f172a;
+
+    font-size: 14px;
+
+    font-family: inherit;
+
+    outline: none;
+
+    transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+
+.form-group input::placeholder {
+    color: #94a3b8;
+}
+
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #2563eb;
+
+    box-shadow:
+            0 0 0 3px rgba(
+                    37,
+                    99,
+                    235,
+                    0.1
+            );
+}
+
+
+/* =========================================
+   SELECT
+========================================= */
+
+.form-group select {
+    cursor: pointer;
+
+    appearance: auto;
+}
+
+
+/* =========================================
+   SELECTED ROLE INFO
+========================================= */
+
+.selected-role {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    padding: 13px 15px;
+
+    background: #eff6ff;
+
+    border:
+            1px solid #bfdbfe;
+
+    border-radius: 10px;
+}
+
+
+.selected-role strong {
+    color: #1d4ed8;
+
+    font-size: 13px;
+}
+
+
+.selected-role span {
+    color: #475569;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================
+   BUTTON
+========================================= */
+
+.register-button {
+    width: 100%;
+
+    border: none;
+
+    padding: 13px 18px;
+
+    margin-top: 5px;
+
+    border-radius: 9px;
+
+    background:
+            linear-gradient(
+                    135deg,
+                    #2563eb,
+                    #1d4ed8
+            );
+
+    color: white;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+
+.register-button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+            0 8px 20px
+            rgba(37, 99, 235, 0.25);
+}
+
+
+.register-button:disabled {
+    opacity: 0.65;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+    box-shadow: none;
+}
+
+
+/* =========================================
+   ERRORS
+========================================= */
+
+.register-error {
+    margin-bottom: 18px;
+
+    padding: 11px 13px;
+
+    border-radius: 8px;
+
+    background: #fef2f2;
+
+    border:
+            1px solid #fecaca;
+
+    color: #b91c1c;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   SUCCESS
+========================================= */
+
+.register-success {
+    margin-bottom: 18px;
+
+    padding: 11px 13px;
+
+    border-radius: 8px;
+
+    background: #f0fdf4;
+
+    border:
+            1px solid #bbf7d0;
+
+    color: #15803d;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   LOGIN LINK
+========================================= */
+
+.login-link {
+    margin-top: 24px;
+
+    padding-top: 20px;
+
+    border-top:
+            1px solid #e2e8f0;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 6px;
+
+    font-size: 13px;
+
+    color: #64748b;
+}
+
+
+.login-link button {
+    border: none;
+
+    background: transparent;
+
+    color: #2563eb;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    padding: 0;
+}
+
+
+.login-link button:hover {
+    color: #1d4ed8;
+
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+
+    .register-container {
+        grid-template-columns: 1fr;
+    }
+
+    .register-info {
+        padding: 35px;
+    }
+
+    .register-card {
+        padding: 35px;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .register-page {
+        padding: 20px 12px;
+    }
+
+    .register-info,
+    .register-card {
+        padding: 28px 22px;
+    }
+
+    .register-info h1 {
+        font-size: 28px;
+    }
+
+    .register-header h2 {
+        font-size: 24px;
+    }
+
+}

@@ -1,69 +1,106 @@
 package com.shiptrack.shiptrack_pro.service.impl;
 
+import com.shiptrack.shiptrack_pro.dto.RouteRequest;
+import com.shiptrack.shiptrack_pro.dto.RouteResponse;
 import com.shiptrack.shiptrack_pro.entity.Route;
+import com.shiptrack.shiptrack_pro.entity.Shipment;
 import com.shiptrack.shiptrack_pro.repository.RouteRepository;
-import com.shiptrack.shiptrack_pro.service.MapService;
+import com.shiptrack.shiptrack_pro.repository.ShipmentRepository;
 import com.shiptrack.shiptrack_pro.service.RouteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RouteServiceImpl implements RouteService {
 
     private final RouteRepository routeRepository;
-    private final MapService mapService;
+    private final ShipmentRepository shipmentRepository;
 
     @Override
-    public Route createRoute(Long shipmentId, Long driverId, String originAddress, String destinationAddress) {
+    public RouteResponse createRoute(
+            Long shipmentId,
+            RouteRequest request,
+            String userEmail) {
 
-        BigDecimal distanceKm = null;
-        Integer estimatedTimeMinutes = null;
-
-        try {
-            double[] originCoords = mapService.geocodeAddress(originAddress);
-            double[] destinationCoords = mapService.geocodeAddress(destinationAddress);
-
-            Map<String, Object> distanceResult = mapService.getDistanceAndDuration(
-                    originCoords[0], originCoords[1],
-                    destinationCoords[0], destinationCoords[1]
-            );
-
-            distanceKm = (BigDecimal) distanceResult.get("distanceKm");
-            estimatedTimeMinutes = (Integer) distanceResult.get("estimatedTimeMinutes");
-
-        } catch (Exception e) {
-            // Maps API failed (geocoding or distance lookup) — log it, but don't block route creation
-            System.err.println("Map service failed for route creation: " + e.getMessage());
-        }
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Shipment not found with id: " + shipmentId
+                        )
+                );
 
         Route route = Route.builder()
-                .shipmentId(shipmentId)
-                .driverId(driverId)
-                .origin(originAddress)
-                .destination(destinationAddress)
-                .distanceKm(distanceKm)
-                .estimatedTimeMinutes(estimatedTimeMinutes)
+                .shipment(shipment)
+                .origin(request.getOrigin())
+                .destination(request.getDestination())
+                .routeName(request.getRouteName())
+                .distanceKm(request.getDistanceKm())
+                .estimatedDurationMinutes(
+                        request.getEstimatedDurationMinutes()
+                )
+                .assignedBy(userEmail)
                 .build();
 
-        return routeRepository.save(route);
+        Route savedRoute = routeRepository.save(route);
+
+        return mapToResponse(savedRoute);
     }
 
     @Override
-    public Route getRouteByShipmentId(Long shipmentId) {
-        return routeRepository.findByShipmentId(shipmentId)
-                .orElseThrow(() -> new RuntimeException("No route found for shipment id: " + shipmentId));
+    public List<RouteResponse> getRoutesByShipment(
+            Long shipmentId) {
+
+        if (!shipmentRepository.existsById(shipmentId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Shipment not found with id: " + shipmentId
+            );
+        }
+
+        return routeRepository
+                .findByShipmentIdOrderByCreatedAtDesc(shipmentId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     @Override
-    public Route assignDriver(Long shipmentId, Long driverId) {
-        Route route = routeRepository.findByShipmentId(shipmentId)
-                .orElseThrow(() -> new RuntimeException("No route found for shipment id: " + shipmentId));
+    public RouteResponse getRouteById(Long routeId) {
 
-        route.setDriverId(driverId);
-        return routeRepository.save(route);
+        Route route = routeRepository.findById(routeId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Route not found with id: " + routeId
+                        )
+                );
+
+        return mapToResponse(route);
+    }
+
+    private RouteResponse mapToResponse(Route route) {
+
+        return RouteResponse.builder()
+                .id(route.getId())
+                .shipmentId(route.getShipment().getId())
+                .trackingNumber(
+                        route.getShipment().getTrackingNumber()
+                )
+                .origin(route.getOrigin())
+                .destination(route.getDestination())
+                .routeName(route.getRouteName())
+                .distanceKm(route.getDistanceKm())
+                .estimatedDurationMinutes(
+                        route.getEstimatedDurationMinutes()
+                )
+                .assignedBy(route.getAssignedBy())
+                .createdAt(route.getCreatedAt())
+                .build();
     }
 }

@@ -1,14 +1,29 @@
+# Application
 spring.application.name=shiptrack-pro
+server.port=8080
 
+# Database
 spring.datasource.url=jdbc:postgresql://localhost:5432/shiptrack
 spring.datasource.username=postgres
-spring.datasource.password=YOUR_PASSWORD_HERE
-
+spring.datasource.password=Rameena@314
 spring.datasource.driver-class-name=org.postgresql.Driver
 
+# JPA
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.format_sql=true
 
-jwt.secret=YOUR_JWT_SECRET_HERE
+# ✅ JWT Configuration
+jwt.secret=ShipTrackProSuperSecretKeyForJWTSigningMustBeAtLeast256BitsLong
 jwt.expiration=86400000
+
+# ✅ Logging (for debugging)
+logging.level.com.shiptrack=DEBUG
+logging.level.org.springframework.security=DEBUG
+logging.level.org.springframework.web=DEBUG
+
+# OSM Configuration
+osm.nominatim.url=https://nominatim.openstreetmap.org
+osm.osrm.url=https://router.project-osrm.org
+osm.user-agent=ShiptrackPro/1.0
