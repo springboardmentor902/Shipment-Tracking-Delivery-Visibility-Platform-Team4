@@ -8,6 +8,8 @@ import {
     createTrackingEvent,
     getCurrentUser,
     updateShipmentStatus,
+    getETAPrediction,
+    predictETA,
 } from "../services/authService";
 
 import "./ShipmentDetail.css";
@@ -42,6 +44,22 @@ function ShipmentDetail() {
     const [loading, setLoading] = useState(true);
 
     const [error, setError] = useState("");
+
+    // ========================================
+// ETA PREDICTION
+// ========================================
+
+    const [etaPrediction, setEtaPrediction] =
+        useState(null);
+
+    const [etaLoading, setEtaLoading] =
+        useState(true);
+
+    const [etaError, setEtaError] =
+        useState("");
+
+    const [etaRefreshing, setEtaRefreshing] =
+        useState(false);
 
 
     // ========================================
@@ -93,12 +111,52 @@ function ShipmentDetail() {
             latitude: "",
             longitude: "",
         });
+    // ========================================
+// LOAD ETA PREDICTION
+// ========================================
+
+    const loadETAPrediction = async () => {
+
+        try {
+
+            setEtaLoading(true);
+            setEtaError("");
+
+            const data =
+                await getETAPrediction(id);
+
+            console.log(
+                "ETA prediction:",
+                data
+            );
+
+            setEtaPrediction(data);
+
+        } catch (err) {
+
+            console.error(
+                "ETA prediction error:",
+                err
+            );
+
+            setEtaError(
+                err.message ||
+                "ETA prediction not available"
+            );
+
+            setEtaPrediction(null);
+
+        } finally {
+
+            setEtaLoading(false);
+
+        }
+    };
 
 
     // ========================================
     // INITIAL LOAD
     // ========================================
-
     useEffect(() => {
 
         const user = getCurrentUser();
@@ -110,8 +168,48 @@ function ShipmentDetail() {
 
         loadShipment();
         loadTrackingEvents();
+        loadETAPrediction();
 
     }, [id, navigate]);
+    // ========================================
+// RECALCULATE ETA
+// ========================================
+
+    const handleRefreshETA = async () => {
+
+        try {
+
+            setEtaRefreshing(true);
+            setEtaError("");
+
+            const data =
+                await predictETA(id);
+
+            console.log(
+                "ETA recalculated:",
+                data
+            );
+
+            setEtaPrediction(data);
+
+        } catch (err) {
+
+            console.error(
+                "ETA recalculation error:",
+                err
+            );
+
+            setEtaError(
+                err.message ||
+                "Failed to recalculate ETA"
+            );
+
+        } finally {
+
+            setEtaRefreshing(false);
+
+        }
+    };
 
 
     // ========================================
@@ -474,6 +572,7 @@ function ShipmentDetail() {
 
                 // Refresh shipment so status is updated
                 await loadShipment();
+                await loadETAPrediction();
 
                 setTrackingForm({
                     status:
@@ -831,6 +930,133 @@ function ShipmentDetail() {
                                 </div>
 
                             </div>
+
+                        </div>
+                        {/* =================================
+    ETA & DELAY RISK
+================================= */}
+
+                        <div className="shipment-detail-card eta-card">
+
+                            <div className="eta-header">
+
+                                <div>
+                                    <h2>
+                                        Estimated Delivery & Delay Risk
+                                    </h2>
+
+                                    <p>
+                                        AI-style rule-based ETA prediction
+                                    </p>
+                                </div>
+
+                                <button
+                                    className="eta-refresh-button"
+                                    onClick={handleRefreshETA}
+                                    disabled={etaRefreshing}
+                                >
+                                    {etaRefreshing
+                                        ? "Calculating..."
+                                        : "Refresh ETA"}
+                                </button>
+
+                            </div>
+
+
+                            {etaLoading ? (
+
+                                <div className="eta-loading">
+                                    Loading ETA prediction...
+                                </div>
+
+                            ) : etaError ? (
+
+                                <div className="detail-error">
+                                    {etaError}
+                                </div>
+
+                            ) : etaPrediction ? (
+
+                                <div className="eta-content">
+
+                                    <div className="eta-main">
+
+                <span className="eta-label">
+                    Predicted Delivery
+                </span>
+
+                                        <strong className="eta-time">
+
+                                            {etaPrediction.predictedDeliveryTime
+                                                ? new Date(
+                                                    etaPrediction.predictedDeliveryTime
+                                                ).toLocaleString()
+                                                : "Not available"}
+
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div className="eta-risk">
+
+                <span className="eta-label">
+                    Delay Risk
+                </span>
+
+                                        <strong
+                                            className={
+                                                `eta-risk-score ${
+                                                    etaPrediction.delayRiskScore >= 7
+                                                        ? "risk-high"
+                                                        : etaPrediction.delayRiskScore >= 4
+                                                            ? "risk-medium"
+                                                            : "risk-low"
+                                                }`
+                                            }
+                                        >
+                                            {etaPrediction.delayRiskScore}
+                                            /10
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div className="eta-confidence">
+
+                <span className="eta-label">
+                    Confidence
+                </span>
+
+                                        <strong>
+                                            {etaPrediction.confidenceScore}%
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div className="eta-factors">
+
+                <span className="eta-label">
+                    Factors
+                </span>
+
+                                        <p>
+                                            {etaPrediction.factors ||
+                                                "No factors available"}
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            ) : (
+
+                                <div className="eta-loading">
+                                    No ETA prediction available.
+                                </div>
+
+                            )}
 
                         </div>
 

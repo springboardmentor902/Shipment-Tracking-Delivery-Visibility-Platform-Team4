@@ -1,8 +1,10 @@
 package com.shiptrack.shiptrack_pro.entity;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,11 +28,20 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "phone")
     private String phone;
+
+    @Column(name = "role", nullable = false)
     private String role;
+
+    @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
+
+    @Column(name = "notes", length = 1000)  // ✅ NEW: Add notes field
+    private String notes;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
