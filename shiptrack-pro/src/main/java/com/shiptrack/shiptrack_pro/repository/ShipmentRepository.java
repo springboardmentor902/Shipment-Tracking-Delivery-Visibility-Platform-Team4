@@ -1,6 +1,7 @@
 package com.shiptrack.shiptrack_pro.repository;
 
 import com.shiptrack.shiptrack_pro.entity.Shipment;
+import com.shiptrack.shiptrack_pro.entity.ShipmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -41,5 +42,11 @@ public interface ShipmentRepository
     Optional<Shipment> findByIdAndAssignedOperatorId(
             Long id,
             Long operatorId
+    );
+
+
+    // Used by ETASchedulerService to find active shipments
+    List<Shipment> findByStatusIn(
+            List<ShipmentStatus> statuses
     );
 }

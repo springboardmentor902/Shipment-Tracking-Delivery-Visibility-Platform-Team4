@@ -22,13 +22,9 @@ public class TestController {
                 "authorities", authentication.getAuthorities().toString()
         );
     }
-<<<<<<< HEAD
-}
-=======
 
     @GetMapping("/public")
     public Map<String, String> publicEndpoint() {
         return Map.of("message", "This is a public endpoint!");
     }
 }
->>>>>>> origin/intern_meenakshi

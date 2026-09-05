@@ -9,6 +9,7 @@ import com.shiptrack.shiptrack_pro.repository.RouteRepository;
 import com.shiptrack.shiptrack_pro.repository.ShipmentRepository;
 import com.shiptrack.shiptrack_pro.repository.TrackingEventRepository;
 import com.shiptrack.shiptrack_pro.service.ETAService;
+import com.shiptrack.shiptrack_pro.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class ETAServiceImpl implements ETAService {
     private final ShipmentRepository shipmentRepository;
     private final RouteRepository routeRepository;
     private final TrackingEventRepository trackingEventRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -164,6 +166,11 @@ public class ETAServiceImpl implements ETAService {
         confidenceScore =
                 Math.max(0, Math.min(100, confidenceScore));
 
+        Double previousScore = etaPredictionRepository
+                .findByShipmentId(shipmentId)
+                .map(ETAPrediction::getDelayRiskScore)
+                .orElse(0.0);
+
         ETAPrediction prediction =
                 etaPredictionRepository
                         .findByShipmentId(shipmentId)
@@ -195,7 +202,14 @@ public class ETAServiceImpl implements ETAService {
                 calculatedAt
         );
 
-        return etaPredictionRepository.save(prediction);
+        ETAPrediction saved = etaPredictionRepository.save(prediction);
+
+        double threshold = 7.0;
+        if (previousScore < threshold && delayRiskScore >= threshold) {
+            notificationService.send("DELAY_WARNING", shipment.getUser(), shipment);
+        }
+
+        return saved;
     }
 
     @Override

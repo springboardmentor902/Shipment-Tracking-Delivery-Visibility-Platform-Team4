@@ -36,6 +36,9 @@ public class Route {
     @Column(name = "estimated_duration_minutes")
     private Integer estimatedDurationMinutes;
 
+    @Column(name = "traffic_condition")
+    private String trafficCondition;
+
     @Column(name = "assigned_by")
     private String assignedBy;
 
