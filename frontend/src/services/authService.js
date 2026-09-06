@@ -790,3 +790,148 @@ export async function predictETA(shipmentId) {
 
     return data;
 }
+// ========================================
+// CUSTOMER ANALYTICS
+// ========================================
+
+export async function getCustomerAnalytics() {
+
+    const token = getToken();
+
+    if (!token) {
+        throw new Error("You are not logged in.");
+    }
+
+    const response = await fetch(
+        `${API_URL}/analytics/customer`,
+        {
+            method: "GET",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        }
+    );
+
+    const text = await response.text();
+
+    let data = {};
+
+    if (text) {
+        try {
+            data = JSON.parse(text);
+        } catch {
+            console.log("Customer Analytics API response:", text);
+        }
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            data.error ||
+            text ||
+            `Failed to fetch customer analytics (${response.status})`
+        );
+    }
+
+    return data;
+}
+
+
+// ========================================
+// BUSINESS ANALYTICS
+// ========================================
+
+export async function getBusinessAnalytics() {
+
+    const token = getToken();
+
+    if (!token) {
+        throw new Error("You are not logged in.");
+    }
+
+    const response = await fetch(
+        `${API_URL}/analytics/business`,
+        {
+            method: "GET",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        }
+    );
+
+    const text = await response.text();
+
+    let data = {};
+
+    if (text) {
+        try {
+            data = JSON.parse(text);
+        } catch {
+            console.log("Business Analytics API response:", text);
+        }
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            data.error ||
+            text ||
+            `Failed to fetch business analytics (${response.status})`
+        );
+    }
+
+    return data;
+}
+
+
+// ========================================
+// ADMIN ANALYTICS
+// ========================================
+
+export async function getAdminAnalytics() {
+
+    const token = getToken();
+
+    if (!token) {
+        throw new Error("You are not logged in.");
+    }
+
+    const response = await fetch(
+        `${API_URL}/analytics/admin`,
+        {
+            method: "GET",
+
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        }
+    );
+
+    const text = await response.text();
+
+    let data = {};
+
+    if (text) {
+        try {
+            data = JSON.parse(text);
+        } catch {
+            console.log("Admin Analytics API response:", text);
+        }
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            data.error ||
+            text ||
+            `Failed to fetch admin analytics (${response.status})`
+        );
+    }
+
+    return data;
+}

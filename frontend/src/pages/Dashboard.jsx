@@ -552,6 +552,8 @@ function Dashboard() {
 
                     </div>
 
+
+
                     {/* =================================
                         SHIPMENT ACTIONS
                     ================================= */}
@@ -571,6 +573,29 @@ function Dashboard() {
                         >
                             View My Shipments
                         </button>
+                        {(
+                            user?.role === "CUSTOMER" ||
+                            user?.role === "BUSINESS_CLIENT" ||
+                            user?.role === "ADMINISTRATOR"
+                        ) && (
+
+                            <button
+                                onClick={() => {
+
+                                    if (user.role === "CUSTOMER") {
+                                        navigate("/customer/analytics");
+                                    } else if (user.role === "BUSINESS_CLIENT") {
+                                        navigate("/business/analytics");
+                                    } else if (user.role === "ADMINISTRATOR") {
+                                        navigate("/admin/analytics");
+                                    }
+
+                                }}
+                            >
+                                📊 View Analytics
+                            </button>
+
+                        )}
 
                         {user?.role ===
                             "BUSINESS_CLIENT" && (
@@ -590,6 +615,7 @@ function Dashboard() {
                                 >
                                     + Create Shipment
                                 </button>
+
 
                             )}
 

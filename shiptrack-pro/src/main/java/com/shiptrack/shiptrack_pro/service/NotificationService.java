@@ -28,11 +28,23 @@ public class NotificationService {
 
 
     // =========================================================
+    // DATE FORMATTER
+    // =========================================================
+
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a");
+
+
+    // =========================================================
     // CREATE NOTIFICATION
     // =========================================================
 
     public NotificationResponse createNotification(
             NotificationRequest request) {
+
+        // -----------------------------------------------------
+        // FIND USER
+        // -----------------------------------------------------
 
         User user = userRepository
                 .findById(request.getUserId())
@@ -44,9 +56,9 @@ public class NotificationService {
                 );
 
 
-        // =====================================================
-        // SAVE NOTIFICATION FOR FRONTEND BELL
-        // =====================================================
+        // -----------------------------------------------------
+        // SAVE NOTIFICATION
+        // -----------------------------------------------------
 
         Notification notification = Notification.builder()
                 .user(user)
@@ -60,40 +72,50 @@ public class NotificationService {
                 notificationRepository.save(notification);
 
 
-        // =====================================================
+        // -----------------------------------------------------
         // SEND EMAIL
-        // =====================================================
+        // -----------------------------------------------------
 
-        try {
+        if (user.getEmail() != null &&
+                !user.getEmail().isBlank()) {
 
-            String emailMessage =
-                    buildDetailedEmail(request);
+            try {
 
-            emailService.sendNotificationEmail(
-                    user.getEmail(),
-                    "ShipTrack Pro - Shipment Notification",
-                    emailMessage
-            );
+                String emailMessage =
+                        buildDetailedEmail(request);
+
+                emailService.sendNotificationEmail(
+                        user.getEmail(),
+                        buildEmailSubject(request),
+                        emailMessage
+                );
+
+                System.out.println(
+                        "Notification email sent successfully to "
+                                + user.getEmail()
+                );
+
+            } catch (Exception e) {
+
+                System.err.println(
+                        "Failed to send notification email to "
+                                + user.getEmail()
+                                + ": "
+                                + e.getMessage()
+                );
+            }
+
+        } else {
 
             System.out.println(
-                    "Notification email sent successfully to "
-                            + user.getEmail()
-            );
-
-        } catch (Exception e) {
-
-            System.err.println(
-                    "Failed to send notification email to "
-                            + user.getEmail()
-                            + ": "
-                            + e.getMessage()
+                    "User does not have a valid email address."
             );
         }
 
 
-        // =====================================================
+        // -----------------------------------------------------
         // SEND SMS ONLY FOR DELAY WARNING
-        // =====================================================
+        // -----------------------------------------------------
 
         if ("DELAY_WARNING".equalsIgnoreCase(
                 request.getNotificationType())) {
@@ -105,7 +127,7 @@ public class NotificationService {
 
                     twilioService.sendSms(
                             user.getPhone(),
-                            request.getMessage()
+                            buildDelaySmsMessage(request)
                     );
 
                     System.out.println(
@@ -122,10 +144,38 @@ public class NotificationService {
                                     + e.getMessage()
                     );
                 }
+
+            } else {
+
+                System.out.println(
+                        "User does not have a valid phone number."
+                );
             }
         }
 
+
         return toResponse(saved);
+    }
+
+
+    // =========================================================
+    // BUILD EMAIL SUBJECT
+    // =========================================================
+
+    private String buildEmailSubject(
+            NotificationRequest request) {
+
+        String notificationType =
+                request.getNotificationType();
+
+        if (notificationType == null ||
+                notificationType.isBlank()) {
+
+            return "ShipTrack Pro - Shipment Notification";
+        }
+
+        return "ShipTrack Pro - "
+                + formatNotificationType(notificationType);
     }
 
 
@@ -161,33 +211,38 @@ public class NotificationService {
         );
 
         email.append(
-                "You have received a shipment notification.\n\n"
+                "You have received a shipment notification "
+                        + "from ShipTrack Pro.\n\n"
         );
 
 
         // =====================================================
-        // NOTIFICATION
+        // NOTIFICATION DETAILS
         // =====================================================
 
         email.append(
-                "NOTIFICATION\n"
+                "NOTIFICATION DETAILS\n"
         );
 
         email.append(
                 "--------------------------------------------------\n"
         );
 
+
         email.append(
-                "Type: "
+                "Notification Type: "
         );
 
         email.append(
                 request.getNotificationType() != null
-                        ? request.getNotificationType()
-                        : "GENERAL"
+                        ? formatNotificationType(
+                        request.getNotificationType()
+                )
+                        : "General"
         );
 
         email.append("\n");
+
 
         email.append(
                 "Message: "
@@ -210,8 +265,11 @@ public class NotificationService {
 
             Shipment shipment =
                     shipmentRepository
-                            .findById(request.getShipmentId())
+                            .findById(
+                                    request.getShipmentId()
+                            )
                             .orElse(null);
+
 
             if (shipment != null) {
 
@@ -225,186 +283,105 @@ public class NotificationService {
 
 
                 // Shipment ID
-                email.append(
-                        "Shipment ID: "
-                );
-
-                email.append(
+                appendField(
+                        email,
+                        "Shipment ID",
                         shipment.getId()
                 );
 
-                email.append("\n");
-
 
                 // Tracking Number
-                email.append(
-                        "Tracking Number: "
-                );
-
-                email.append(
+                appendField(
+                        email,
+                        "Tracking Number",
                         shipment.getTrackingNumber()
                 );
 
-                email.append("\n");
-
 
                 // Sender
-                email.append(
-                        "Sender: "
-                );
-
-                email.append(
+                appendField(
+                        email,
+                        "Sender",
                         shipment.getSender()
                 );
 
-                email.append("\n");
-
 
                 // Receiver
-                email.append(
-                        "Receiver: "
-                );
-
-                email.append(
+                appendField(
+                        email,
+                        "Receiver",
                         shipment.getReceiver()
                 );
 
-                email.append("\n");
-
 
                 // Origin
-                email.append(
-                        "Origin: "
-                );
-
-                email.append(
+                appendField(
+                        email,
+                        "Origin",
                         shipment.getOrigin()
                 );
 
-                email.append("\n");
-
 
                 // Destination
-                email.append(
-                        "Destination: "
-                );
-
-                email.append(
+                appendField(
+                        email,
+                        "Destination",
                         shipment.getDestination()
                 );
 
-                email.append("\n");
-
 
                 // Current Location
-                email.append(
-                        "Current Location: "
+                appendField(
+                        email,
+                        "Current Location",
+                        shipment.getCurrentLocation()
                 );
-
-                email.append(
-                        shipment.getCurrentLocation() != null
-                                ? shipment.getCurrentLocation()
-                                : "Not available"
-                );
-
-                email.append("\n");
 
 
                 // Status
-                email.append(
-                        "Status: "
+                appendField(
+                        email,
+                        "Status",
+                        shipment.getStatus()
                 );
-
-                email.append(
-                        shipment.getStatus() != null
-                                ? shipment.getStatus()
-                                : "Not available"
-                );
-
-                email.append("\n");
 
 
                 // Estimated Delivery
-                email.append(
-                        "Estimated Delivery: "
+                appendDateField(
+                        email,
+                        "Estimated Delivery",
+                        shipment.getEstimatedDelivery()
                 );
-
-                if (shipment.getEstimatedDelivery() != null) {
-
-                    DateTimeFormatter formatter =
-                            DateTimeFormatter.ofPattern(
-                                    "dd MMM yyyy, hh:mm a"
-                            );
-
-                    email.append(
-                            shipment.getEstimatedDelivery()
-                                    .format(formatter)
-                    );
-
-                } else {
-
-                    email.append(
-                            "Not available"
-                    );
-                }
-
-                email.append("\n");
 
 
                 // Created At
-                email.append(
-                        "Created At: "
+                appendDateField(
+                        email,
+                        "Created At",
+                        shipment.getCreatedAt()
                 );
 
-                if (shipment.getCreatedAt() != null) {
 
-                    DateTimeFormatter formatter =
-                            DateTimeFormatter.ofPattern(
-                                    "dd MMM yyyy, hh:mm a"
-                            );
+                // Updated At
+                appendDateField(
+                        email,
+                        "Last Updated",
+                        shipment.getUpdatedAt()
+                );
 
-                    email.append(
-                            shipment.getCreatedAt()
-                                    .format(formatter)
-                    );
-
-                } else {
-
-                    email.append(
-                            "Not available"
-                    );
-                }
 
                 email.append("\n");
 
 
-                // Updated At
+            } else {
+
                 email.append(
-                        "Last Updated: "
+                        "SHIPMENT DETAILS\n"
                 );
 
-                if (shipment.getUpdatedAt() != null) {
-
-                    DateTimeFormatter formatter =
-                            DateTimeFormatter.ofPattern(
-                                    "dd MMM yyyy, hh:mm a"
-                            );
-
-                    email.append(
-                            shipment.getUpdatedAt()
-                                    .format(formatter)
-                    );
-
-                } else {
-
-                    email.append(
-                            "Not available"
-                    );
-                }
-
-                email.append("\n\n");
-
-            } else {
+                email.append(
+                        "--------------------------------------------------\n"
+                );
 
                 email.append(
                         "Shipment details are currently unavailable.\n\n"
@@ -428,16 +405,192 @@ public class NotificationService {
         );
 
         email.append(
-                "Thank you for using ShipTrack Pro.\n"
+                "Thank you for using ShipTrack Pro.\n\n"
         );
 
         email.append(
-                "This is an automated notification. "
-                        + "Please do not reply to this email.\n"
+                "This is an automated notification from "
+                        + "ShipTrack Pro.\n"
+        );
+
+        email.append(
+                "Please do not reply directly to this email.\n"
         );
 
 
         return email.toString();
+    }
+
+
+    // =========================================================
+    // BUILD DELAY SMS
+    // =========================================================
+
+    private String buildDelaySmsMessage(
+            NotificationRequest request) {
+
+        StringBuilder sms =
+                new StringBuilder();
+
+        sms.append(
+                "ShipTrack Pro - Delay Warning\n"
+        );
+
+        sms.append(
+                request.getMessage() != null
+                        ? request.getMessage()
+                        : "Your shipment may be delayed."
+        );
+
+
+        if (request.getShipmentId() != null) {
+
+            Shipment shipment =
+                    shipmentRepository
+                            .findById(
+                                    request.getShipmentId()
+                            )
+                            .orElse(null);
+
+            if (shipment != null) {
+
+                sms.append(
+                        "\nTracking: "
+                );
+
+                sms.append(
+                        shipment.getTrackingNumber() != null
+                                ? shipment.getTrackingNumber()
+                                : "N/A"
+                );
+
+                sms.append(
+                        "\nCurrent Location: "
+                );
+
+                sms.append(
+                        shipment.getCurrentLocation() != null
+                                ? shipment.getCurrentLocation()
+                                : "N/A"
+                );
+
+                sms.append(
+                        "\nDestination: "
+                );
+
+                sms.append(
+                        shipment.getDestination() != null
+                                ? shipment.getDestination()
+                                : "N/A"
+                );
+            }
+        }
+
+
+        return sms.toString();
+    }
+
+
+    // =========================================================
+    // APPEND NORMAL FIELD
+    // =========================================================
+
+    private void appendField(
+            StringBuilder email,
+            String fieldName,
+            Object value) {
+
+        email.append(fieldName);
+        email.append(": ");
+
+        if (value != null &&
+                !value.toString().isBlank()) {
+
+            email.append(value);
+
+        } else {
+
+            email.append("Not available");
+        }
+
+        email.append("\n");
+    }
+
+
+    // =========================================================
+    // APPEND DATE FIELD
+    // =========================================================
+
+    private void appendDateField(
+            StringBuilder email,
+            String fieldName,
+            java.time.LocalDateTime value) {
+
+        email.append(fieldName);
+        email.append(": ");
+
+        if (value != null) {
+
+            email.append(
+                    value.format(DATE_FORMATTER)
+            );
+
+        } else {
+
+            email.append(
+                    "Not available"
+            );
+        }
+
+        email.append("\n");
+    }
+
+
+    // =========================================================
+    // FORMAT NOTIFICATION TYPE
+    // =========================================================
+
+    private String formatNotificationType(
+            String notificationType) {
+
+        if (notificationType == null ||
+                notificationType.isBlank()) {
+
+            return "General";
+        }
+
+        String[] words =
+                notificationType
+                        .replace("_", " ")
+                        .toLowerCase()
+                        .split(" ");
+
+        StringBuilder result =
+                new StringBuilder();
+
+        for (String word : words) {
+
+            if (word.isEmpty()) {
+                continue;
+            }
+
+            result.append(
+                    Character.toUpperCase(
+                            word.charAt(0)
+                    )
+            );
+
+            if (word.length() > 1) {
+
+                result.append(
+                        word.substring(1)
+                );
+            }
+
+            result.append(" ");
+        }
+
+        return result.toString().trim();
     }
 
 
@@ -476,10 +629,15 @@ public class NotificationService {
                                 )
                         );
 
+
         notification.setRead(true);
 
+
         Notification updated =
-                notificationRepository.save(notification);
+                notificationRepository.save(
+                        notification
+                );
+
 
         return toResponse(updated);
     }

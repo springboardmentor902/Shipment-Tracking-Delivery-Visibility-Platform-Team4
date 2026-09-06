@@ -1,0 +1,409 @@
+
+.pod-verification-page {
+    min-height: 100vh;
+    background: #f5f7fb;
+    padding: 40px 20px;
+}
+
+.pod-verification-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   HEADER
+======================================== */
+
+.pod-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+}
+
+.pod-page-header h1 {
+    margin: 12px 0 5px;
+    font-size: 32px;
+    color: #111827;
+}
+
+.pod-page-header p {
+    margin: 0;
+    color: #6b7280;
+}
+
+.pod-back-button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 0;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.pod-back-button:hover {
+    text-decoration: underline;
+}
+
+.pod-refresh-button {
+    padding: 10px 18px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.pod-refresh-button:hover {
+    background: #f3f4f6;
+}
+
+.pod-refresh-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   ERROR
+======================================== */
+
+.pod-error {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* ========================================
+   QUEUE
+======================================== */
+
+.pod-queue-card,
+.pod-detail-card {
+    background: white;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+}
+
+.pod-queue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.pod-queue-header h2 {
+    margin: 0 0 5px;
+    color: #111827;
+}
+
+.pod-queue-header p {
+    margin: 0;
+    color: #6b7280;
+}
+
+.pod-count {
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-weight: 700;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* ========================================
+   POD LIST
+======================================== */
+
+.pod-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pod-list-item {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #e5e7eb;
+    background: white;
+    padding: 18px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.pod-list-item:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.pod-list-info h3 {
+    margin: 0 0 10px;
+    color: #111827;
+}
+
+.pod-list-info p {
+    margin: 5px 0;
+    color: #4b5563;
+}
+
+.pod-list-info strong {
+    color: #111827;
+}
+
+.pod-pending-badge {
+    display: inline-block;
+    background: #fef3c7;
+    color: #92400e !important;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 11px !important;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+.pod-view-button {
+    border: none;
+    background: #2563eb;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pod-view-button:hover {
+    background: #1d4ed8;
+}
+
+/* ========================================
+   EMPTY STATE
+======================================== */
+
+.pod-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+}
+
+.pod-empty h3 {
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+/* ========================================
+   DETAIL HEADER
+======================================== */
+
+.pod-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+}
+
+.pod-detail-header h2 {
+    margin: 12px 0 5px;
+    color: #111827;
+}
+
+/* ========================================
+   POD INFORMATION
+======================================== */
+
+.pod-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.pod-info-item {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 9px;
+}
+
+.pod-info-item span {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+.pod-info-item strong {
+    color: #111827;
+    word-break: break-word;
+}
+
+/* ========================================
+   FILES
+======================================== */
+
+.pod-files-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 25px;
+}
+
+.pod-file-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.pod-file-card h3 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #111827;
+}
+
+.pod-signature-image,
+.pod-delivery-image {
+    width: 100%;
+    height: 260px;
+    object-fit: contain;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.pod-delivery-image {
+    object-fit: cover;
+}
+
+.pod-file-empty {
+    height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    color: #6b7280;
+    border-radius: 8px;
+}
+
+/* ========================================
+   REJECTION
+======================================== */
+
+.pod-rejection-section {
+    margin-top: 25px;
+}
+
+.pod-rejection-section label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #111827;
+}
+
+.pod-rejection-section textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.pod-rejection-section textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+/* ========================================
+   ACTIONS
+======================================== */
+
+.pod-verification-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.pod-verification-actions button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.pod-approve-button {
+    background: #16a34a;
+    color: white;
+}
+
+.pod-approve-button:hover {
+    background: #15803d;
+}
+
+.pod-reject-button {
+    background: #dc2626;
+    color: white;
+}
+
+.pod-reject-button:hover {
+    background: #b91c1c;
+}
+
+.pod-verification-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 900px) {
+
+    .pod-files-section {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .pod-page-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .pod-detail-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .pod-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pod-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pod-view-button {
+        width: 100%;
+    }
+
+    .pod-verification-actions {
+        flex-direction: column;
+    }
+
+    .pod-verification-actions button {
+        width: 100%;
+    }
+}
