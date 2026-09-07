@@ -30,35 +30,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        // ✅ Allow ALL origins for development (or specify your frontend URLs)
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
-                "http://localhost:5178",
-                "http://localhost:5179",
-                "http://localhost:5160"
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:5175",
+                "http://localhost:5176",
+                "http://localhost:5177",
+                "http://127.0.0.1:5173"
         ));
-
-        // ✅ Allow all common HTTP methods
-        configuration.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"
-        ));
-
-        // ✅ Allow all headers
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // ✅ Allow credentials (JWT tokens)
         configuration.setAllowCredentials(true);
-
-        // ✅ Cache preflight response for 1 hour
         configuration.setMaxAge(3600L);
-
-        // ✅ Expose headers that the frontend needs to access
-        configuration.setExposedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With"
-        ));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -73,32 +58,125 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // ✅ Enable CORS with our configuration
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // ✅ Disable CSRF (we're using JWT)
                 .csrf(csrf -> csrf.disable())
-
-                // ✅ Stateless session
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // ✅ Authorize requests
                 .authorizeHttpRequests(auth -> auth
+
+                        // ===== PUBLIC ENDPOINTS =====
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/api/ws/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+
+                        // ===== USER MANAGEMENT =====
                         .requestMatchers("/api/users/me").authenticated()
                         .requestMatchers("/api/users/me/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/users/{id}/status")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+
+                        // ===== ADMIN =====
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRATOR")
+
+                        // ===== BUSINESS ACCOUNT =====
+                        .requestMatchers("/api/business/account/me").authenticated()
+                        .requestMatchers("/api/business/account/check").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/business/account").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/business/account/me").authenticated()
+                        .requestMatchers("/api/business/accounts/**").hasRole("ADMINISTRATOR")
+                        .requestMatchers("/api/business/account/user/**").hasRole("ADMINISTRATOR")
+                        .requestMatchers("/api/business/account/*/verify").hasRole("ADMINISTRATOR")
+
+                        // ===== SHIPMENT - FIXED =====
+                        // ✅ Customers can view their own shipments
+                        .requestMatchers(HttpMethod.GET, "/api/shipments/user").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/shipments/user/**").authenticated()
+
+                        // ✅ Anyone can view by ID or tracking number
+                        .requestMatchers(HttpMethod.GET, "/api/shipments/{id}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/shipments/tracking/{trackingNumber}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/shipments/search").authenticated()
+
+                        // ✅ Business Client, Operator, Admin can create shipments
+                        .requestMatchers(HttpMethod.POST, "/api/shipments")
+                        .hasAnyRole("BUSINESS_CLIENT", "LOGISTICS_OPERATOR", "ADMINISTRATOR")
+
+                        // ✅ View all shipments - Operator, Admin
+                        .requestMatchers(HttpMethod.GET, "/api/shipments")
+                        .hasAnyRole("BUSINESS_CLIENT", "LOGISTICS_OPERATOR", "ADMINISTRATOR")
+
+                        // ✅ Active shipments - anyone authenticated
+                        .requestMatchers(HttpMethod.GET, "/api/shipments/active").authenticated()
+
+                        // ✅ Update - Operator/Admin
+                        .requestMatchers(HttpMethod.PUT, "/api/shipments/{id}")
+                        .hasAnyRole("BUSINESS_CLIENT", "LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/shipments/{id}/status")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/shipments/{id}/cancel")
+                        .hasAnyRole("BUSINESS_CLIENT", "LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/shipments/{id}")
+                        .hasRole("ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/shipments/delayed")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/shipments/stats/**")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+
+                        // ===== PACKAGE =====
+                        .requestMatchers(HttpMethod.GET, "/api/packages/shipment/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/packages/{id}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/packages")
+                        .hasAnyRole("BUSINESS_CLIENT", "LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/packages/**")
+                        .hasAnyRole("BUSINESS_CLIENT", "LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/packages/**")
+                        .hasAnyRole("BUSINESS_CLIENT", "LOGISTICS_OPERATOR", "ADMINISTRATOR")
+
+                        // ===== ROUTE =====
+                        .requestMatchers(HttpMethod.POST, "/api/routes")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/routes/shipment/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/routes/{id}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/routes")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/routes/driver/**")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/routes/{id}")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/routes/{id}/driver")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/routes/{id}/status")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/routes/{id}")
+                        .hasRole("ADMINISTRATOR")
+
+                        // ===== LOCATION =====
+                        .requestMatchers(HttpMethod.POST, "/api/location/route/**")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "DRIVER", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/location/shipment/**").authenticated()
+
+                        // ===== TRACKING =====
+                        .requestMatchers(HttpMethod.POST, "/api/tracking/{shipmentId}/events")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/tracking/{shipmentId}/history").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/tracking/{shipmentId}/latest").authenticated()
+
+                        // ===== GEOCODING =====
+                        .requestMatchers("/api/geocode/**").authenticated()
+
+                        // ===== PROOF OF DELIVERY =====
+                        .requestMatchers(HttpMethod.POST, "/api/pod/**")
+                        .hasAnyRole("LOGISTICS_OPERATOR", "ADMINISTRATOR")
+                        .requestMatchers(HttpMethod.GET, "/api/pod/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/pod/*/verify")
+                        .hasRole("ADMINISTRATOR")
+
                         .anyRequest().authenticated()
                 )
-
-                // ✅ Disable default security features
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
-
-                // ✅ Add JWT filter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

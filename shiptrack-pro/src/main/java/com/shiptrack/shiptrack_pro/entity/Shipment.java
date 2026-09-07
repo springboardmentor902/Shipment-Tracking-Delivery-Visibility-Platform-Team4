@@ -5,7 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;  // ✅ ADD THIS
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "shipments")
@@ -28,7 +28,6 @@ public class Shipment {
     @Column(name = "destination", nullable = false)
     private String destination;
 
-    // Sender Details
     @Column(name = "sender_name", nullable = false)
     private String senderName;
 
@@ -41,7 +40,6 @@ public class Shipment {
     @Column(name = "sender_address")
     private String senderAddress;
 
-    // Recipient Details
     @Column(name = "recipient_name", nullable = false)
     private String recipientName;
 
@@ -54,21 +52,19 @@ public class Shipment {
     @Column(name = "recipient_address")
     private String recipientAddress;
 
-    // Pickup & Delivery
     @Column(name = "pickup_address")
     private String pickupAddress;
 
     @Column(name = "delivery_address")
     private String deliveryAddress;
 
-    // Package Details
-    @Column(name = "weight", nullable = false)
+    @Column(name = "weight")
     private Double weight;
 
     @Column(name = "dimensions")
-    private String dimensions; // L x W x H in cm
+    private String dimensions;
 
-    @Column(name = "item_description", nullable = false)
+    @Column(name = "item_description")
     private String itemDescription;
 
     @Column(name = "item_value")
@@ -81,14 +77,15 @@ public class Shipment {
     private Boolean fragile;
 
     @Column(name = "priority")
-    private String priority; // STANDARD, EXPRESS, PRIORITY
+    private String priority;
 
-    // Status
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private ShipmentStatus status;
 
-    // Dates
+    @Column(name = "current_location")
+    private String currentLocation;
+
     @Column(name = "expected_delivery_date")
     private LocalDateTime expectedDeliveryDate;
 
@@ -101,18 +98,17 @@ public class Shipment {
     @Column(name = "cancellation_reason")
     private String cancellationReason;
 
-    // Audit Fields
-    @Column(name = "created_by_user_id", nullable = false)
+    @Column(name = "created_by_user_id")
     private Long createdByUserId;
 
-    @Column(name = "business_id")
-    private Long businessId;
+    @Column(name = "last_updated_by_user_id")
+    private Long lastUpdatedByUserId;
 
     @Column(name = "assigned_operator_id")
     private Long assignedOperatorId;
 
-    @Column(name = "last_updated_by_user_id")
-    private Long lastUpdatedByUserId;
+    @Column(name = "business_id")
+    private Long businessId;
 
     @Column(name = "notes", length = 1000)
     private String notes;
@@ -125,7 +121,6 @@ public class Shipment {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Enum for Shipment Status
     public enum ShipmentStatus {
         CREATED,
         PICKED_UP,
@@ -137,7 +132,6 @@ public class Shipment {
         RETURNED
     }
 
-    // Helper methods
     public boolean isActive() {
         return status != ShipmentStatus.CANCELLED &&
                 status != ShipmentStatus.DELIVERED &&

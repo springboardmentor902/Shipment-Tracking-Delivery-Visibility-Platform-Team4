@@ -24,6 +24,7 @@ public class TrackingEvent {
     @Column(name = "route_id")
     private Long routeId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "event_type", nullable = false)
     private EventType eventType;
 
@@ -39,6 +40,7 @@ public class TrackingEvent {
     @Column(name = "description")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private EventStatus status;
 
@@ -53,6 +55,12 @@ public class TrackingEvent {
 
     @Column(name = "photo_url")
     private String photoUrl;
+
+    @Column(name = "signature_url")
+    private String signatureUrl;
+
+    @Column(name = "recipient_name")
+    private String recipientName;
 
     @Column(name = "notes")
     private String notes;

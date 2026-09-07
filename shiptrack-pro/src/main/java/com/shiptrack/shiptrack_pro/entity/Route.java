@@ -22,38 +22,29 @@ public class Route {
     @Column(name = "shipment_id", nullable = false)
     private Long shipmentId;
 
-    @Column(name = "origin_lat", nullable = false)
-    private Double originLat;
-
-    @Column(name = "origin_lng", nullable = false)
-    private Double originLng;
-
-    @Column(name = "destination_lat", nullable = false)
-    private Double destinationLat;
-
-    @Column(name = "destination_lng", nullable = false)
-    private Double destinationLng;
-
-    @Column(name = "origin_address")
+    @Column(name = "origin_address", nullable = false)
     private String originAddress;
 
-    @Column(name = "destination_address")
+    @Column(name = "destination_address", nullable = false)
     private String destinationAddress;
+
+    @Column(name = "origin_lat")
+    private Double originLat;
+
+    @Column(name = "origin_lng")
+    private Double originLng;
+
+    @Column(name = "destination_lat")
+    private Double destinationLat;
+
+    @Column(name = "destination_lng")
+    private Double destinationLng;
 
     @Column(name = "current_lat")
     private Double currentLat;
 
     @Column(name = "current_lng")
     private Double currentLng;
-
-    @Column(name = "status", nullable = false)
-    private RouteStatus status;
-
-    @Column(name = "assigned_driver_id")
-    private Long assignedDriverId;
-
-    @Column(name = "vehicle_id")
-    private String vehicleId;
 
     @Column(name = "distance_km")
     private Double distanceKm;
@@ -70,19 +61,43 @@ public class Route {
     @Column(name = "actual_delivery_time")
     private LocalDateTime actualDeliveryTime;
 
-    @Column(name = "route_polyline")
-    @Lob
-    private String routePolyline; // Encoded polyline for map display
+    @Column(name = "status")
+    private String status;
 
-    @Column(name = "waypoints")
-    @Lob
-    private String waypoints; // JSON array of waypoints
+    @Column(name = "assigned_driver_id")
+    private Long assignedDriverId;
+
+    @Column(name = "driver_name")
+    private String driverName;
+
+    @Column(name = "driver_phone")
+    private String driverPhone;
+
+    @Column(name = "vehicle_number")
+    private String vehicleNumber;
+
+    @Column(name = "route_polyline", columnDefinition = "TEXT")
+    private String routePolyline;
+
+    @Column(name = "waypoints", columnDefinition = "TEXT")
+    private String waypoints;
 
     @Column(name = "traffic_delay_minutes")
     private Integer trafficDelayMinutes;
 
-    @Column(name = "notes")
+    @Column(name = "notes", length = 1000)
     private String notes;
+
+    @Column(name = "created_by_user_id")
+    private Long createdByUserId;
+
+    @Column(name = "updated_by_user_id")
+    private Long updatedByUserId;
+
+    // ✅ NEW FIELDS
+    @Column(name = "is_current_route")
+    @Builder.Default
+    private Boolean isCurrentRoute = false;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -92,11 +107,12 @@ public class Route {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public enum RouteStatus {
-        PLANNED,
-        IN_TRANSIT,
-        DELAYED,
-        DELIVERED,
-        CANCELLED
+    // ✅ Helper method to mark as current
+    public void setAsCurrent() {
+        this.isCurrentRoute = true;
+    }
+
+    public void setAsNotCurrent() {
+        this.isCurrentRoute = false;
     }
 }
