@@ -73,10 +73,8 @@ function BusinessAnalytics() {
     if (!analytics) return null;
 
     const statusBreakdown =
-        analytics.logisticsOverview?.shipmentCountByStatus ||
-        analytics.statusBreakdown ||
-        {};
-
+    analytics.shipmentStatusBreakdown ||
+    {};
     const customerActivity =
         analytics.customerActivity || [];
 
@@ -140,70 +138,41 @@ function BusinessAnalytics() {
             </div>
 
             <AnalyticsSection
-                title="Shipment Analytics"
-                data={analytics.shipmentAnalytics}
-            />
+    title="Shipment Analytics"
+    data={analytics.shipmentStatusBreakdown}
+/>
 
             <AnalyticsSection
-                title="Delivery Performance"
-                data={analytics.deliveryPerformance}
-            />
+    title="Delivery Performance"
+    data={{
+        deliverySuccessRate: analytics.deliverySuccessRate,
+        deliveryFailureRate: analytics.deliveryFailureRate,
+        deliveredShipments: analytics.deliveredShipments,
+        failedDeliveries: analytics.failedDeliveries,
+    }}
+/>
 
             <AnalyticsSection
                 title="Delay Analysis"
                 data={analytics.delayAnalysis}
             />
+<div className="analytics-panel">
+    <h2>Logistics Overview</h2>
 
-            <div className="analytics-panel">
-                <h2>Logistics Overview</h2>
-
-                {Object.entries(statusBreakdown).map(
-                    ([status, count]) => (
-                        <div className="simple-row" key={status}>
-                            <span>{formatStatus(status)}</span>
-                            <strong>{count}</strong>
-                        </div>
-                    )
-                )}
-            </div>
-
-            <div className="analytics-panel">
-                <h2>Customer Activity</h2>
-
-                {Array.isArray(customerActivity) &&
-                customerActivity.length > 0 ? (
-                    <div className="analytics-table-container">
-                        <table className="analytics-table">
-                            <thead>
-                            <tr>
-                                <th>Customer</th>
-                                <th>Shipment Count</th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                            {customerActivity.map((item, index) => (
-                                <tr key={index}>
-                                    <td>
-                                        {item.customer ||
-                                            item.receiver ||
-                                            item.name ||
-                                            "N/A"}
-                                    </td>
-                                    <td>
-                                        {item.shipmentCount ??
-                                            item.count ??
-                                            0}
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <p>No customer activity available.</p>
-                )}
-            </div>
+    {analytics.logisticsOverview &&
+    Object.keys(analytics.logisticsOverview).length > 0 ? (
+        Object.entries(analytics.logisticsOverview).map(
+            ([key, value]) => (
+                <div className="simple-row" key={key}>
+                    <span>{formatStatus(key)}</span>
+                    <strong>{value}</strong>
+                </div>
+            )
+        )
+    ) : (
+        <p>No logistics overview data available.</p>
+    )}
+</div>
 
             <div className="analytics-panel">
                 <h2>Route Performance</h2>

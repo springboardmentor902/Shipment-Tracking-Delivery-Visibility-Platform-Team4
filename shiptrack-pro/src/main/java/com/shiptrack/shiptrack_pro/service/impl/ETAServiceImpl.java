@@ -9,6 +9,7 @@ import com.shiptrack.shiptrack_pro.repository.RouteRepository;
 import com.shiptrack.shiptrack_pro.repository.ShipmentRepository;
 import com.shiptrack.shiptrack_pro.repository.TrackingEventRepository;
 import com.shiptrack.shiptrack_pro.service.ETAService;
+import com.shiptrack.shiptrack_pro.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class ETAServiceImpl implements ETAService {
     private final ShipmentRepository shipmentRepository;
     private final RouteRepository routeRepository;
     private final TrackingEventRepository trackingEventRepository;
-
+    private final NotificationService notificationService;
     @Override
     @Transactional
     public ETAPrediction predictETA(Long shipmentId) {
@@ -40,16 +41,11 @@ public class ETAServiceImpl implements ETAService {
                         )
                 );
 
-        Route route = routeRepository
-                .findByShipmentIdOrderByCreatedAtDesc(shipmentId)
-                .stream()
-                .findFirst()
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "No route found for shipment: " + shipmentId
-                        )
-                );
+       Route route = routeRepository
+        .findByShipmentIdOrderByCreatedAtDesc(shipmentId)
+        .stream()
+        .findFirst()
+        .orElse(null);
 
         List<TrackingEvent> events =
                 trackingEventRepository
@@ -59,24 +55,40 @@ public class ETAServiceImpl implements ETAService {
 
         LocalDateTime calculatedAt = LocalDateTime.now();
 
-        Integer estimatedMinutes =
-                route.getEstimatedDurationMinutes();
+        Integer estimatedMinutes = null;
 
-        if (estimatedMinutes == null || estimatedMinutes < 0) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Route does not contain a valid estimated duration"
-            );
-        }
+if (route != null) {
+    estimatedMinutes = route.getEstimatedDurationMinutes();
+}
 
-        LocalDateTime predictedDeliveryTime =
-                calculatedAt.plusMinutes(estimatedMinutes);
+LocalDateTime predictedDeliveryTime;
 
+if (estimatedMinutes != null && estimatedMinutes >= 0) {
+
+    // Route-based ETA
+    predictedDeliveryTime =
+            calculatedAt.plusMinutes(estimatedMinutes);
+
+} else if (shipment.getEstimatedDelivery() != null) {
+
+    // Use shipment's existing estimated delivery
+    predictedDeliveryTime =
+            shipment.getEstimatedDelivery();
+
+} else {
+
+    // Final fallback so every shipment gets an ETA
+    predictedDeliveryTime =
+            calculatedAt.plusDays(1);
+}
         double delayRiskScore = 0.0;
 
         StringBuilder factors = new StringBuilder();
 
-        String trafficCondition = getTrafficCondition(route);
+        String trafficCondition =
+        route != null
+                ? getTrafficCondition(route)
+                : "LOW";
 
         switch (trafficCondition) {
 
@@ -122,12 +134,13 @@ public class ETAServiceImpl implements ETAService {
             }
         }
 
-        if (route.getDistanceKm() != null &&
-                route.getDistanceKm() > 500) {
+        if (route != null &&
+        route.getDistanceKm() != null &&
+        route.getDistanceKm() > 500) {
 
-            delayRiskScore += 1;
-            factors.append("Long route distance (+1); ");
-        }
+    delayRiskScore += 1;
+    factors.append("Long route distance (+1); ");
+}
 
         if (shipment.getStatus() != null &&
                 "DELIVERED".equalsIgnoreCase(
@@ -155,15 +168,19 @@ public class ETAServiceImpl implements ETAService {
             confidenceScore = 90.0;
         }
 
-        if (route.getDistanceKm() == null ||
-                route.getEstimatedDurationMinutes() == null) {
+        if (route == null ||
+        route.getDistanceKm() == null ||
+        route.getEstimatedDurationMinutes() == null) {
 
-            confidenceScore -= 20.0;
-        }
+    confidenceScore -= 20.0;
+}
 
         confidenceScore =
                 Math.max(0, Math.min(100, confidenceScore));
-
+        Double previousScore = etaPredictionRepository
+        .findByShipmentId(shipmentId)
+        .map(ETAPrediction::getDelayRiskScore)
+        .orElse(0.0);
         ETAPrediction prediction =
                 etaPredictionRepository
                         .findByShipmentId(shipmentId)
@@ -195,31 +212,37 @@ public class ETAServiceImpl implements ETAService {
                 calculatedAt
         );
 
-        return etaPredictionRepository.save(prediction);
+        ETAPrediction saved = etaPredictionRepository.save(prediction);
+
+double threshold = 7.0;
+
+if (previousScore < threshold && delayRiskScore >= threshold) {
+    notificationService.send(
+            "DELAY_WARNING",
+            shipment.getUser(),
+            shipment
+    );
+}
+
+return saved;
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ETAPrediction getPrediction(Long shipmentId) {
+@Transactional
+public ETAPrediction getPrediction(Long shipmentId) {
 
-        if (!shipmentRepository.existsById(shipmentId)) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Shipment not found with id: " + shipmentId
+    Shipment shipment = shipmentRepository.findById(shipmentId)
+            .orElseThrow(() ->
+                    new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Shipment not found with id: " + shipmentId
+                    )
             );
-        }
 
-        return etaPredictionRepository
-                .findByShipmentId(shipmentId)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "ETA prediction not found for shipment: "
-                                        + shipmentId
-                        )
-                );
-    }
+    return etaPredictionRepository
+            .findByShipmentId(shipmentId)
+            .orElseGet(() -> predictETA(shipmentId));
+}
 
     private String getTrafficCondition(Route route) {
 

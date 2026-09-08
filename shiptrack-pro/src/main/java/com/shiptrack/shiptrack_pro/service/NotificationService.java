@@ -25,7 +25,7 @@ public class NotificationService {
     private final ShipmentRepository shipmentRepository;
     private final EmailService emailService;
     private final TwilioService twilioService;
-
+    private final PushNotificationService pushNotificationService;
 
     // =========================================================
     // DATE FORMATTER
@@ -152,6 +152,25 @@ public class NotificationService {
                 );
             }
         }
+        // -----------------------------------------------------
+// SEND BROWSER PUSH NOTIFICATION
+// -----------------------------------------------------
+
+try {
+
+    pushNotificationService.sendPush(
+            user,
+            buildPushTitle(request),
+            request.getMessage()
+    );
+
+} catch (Exception e) {
+
+    System.err.println(
+            "Failed to send push notification: "
+                    + e.getMessage()
+    );
+}
 
 
         return toResponse(saved);
@@ -592,6 +611,52 @@ public class NotificationService {
 
         return result.toString().trim();
     }
+    // =========================================================
+// AUTOMATIC SHIPMENT NOTIFICATION
+// =========================================================
+
+public void send(
+        String type,
+        User user,
+        Shipment shipment) {
+
+    if (user == null || shipment == null) {
+        return;
+    }
+
+    NotificationRequest request =
+            new NotificationRequest();
+
+    request.setUserId(user.getId());
+    request.setNotificationType(type);
+    request.setShipmentId(shipment.getId());
+
+    if ("DELAY_WARNING".equalsIgnoreCase(type)) {
+
+        request.setMessage(
+                "Your shipment "
+                        + shipment.getTrackingNumber()
+                        + " may be delayed."
+        );
+
+    } else if ("SHIPMENT_UPDATE".equalsIgnoreCase(type)) {
+
+        request.setMessage(
+                "Your shipment "
+                        + shipment.getTrackingNumber()
+                        + " has a new tracking update."
+        );
+
+    } else {
+
+        request.setMessage(
+                "There is a new update for your shipment "
+                        + shipment.getTrackingNumber()
+        );
+    }
+
+    createNotification(request);
+}
 
 
     // =========================================================
@@ -667,4 +732,32 @@ public class NotificationService {
                 )
                 .build();
     }
+    private String buildPushTitle(
+        NotificationRequest request) {
+
+    String type =
+            request.getNotificationType();
+
+    if ("DELAY_WARNING".equalsIgnoreCase(type)) {
+
+        return "⚠️ Shipment Delay Warning";
+    }
+
+    if ("SHIPMENT_UPDATE".equalsIgnoreCase(type)) {
+
+        return "📦 Shipment Update";
+    }
+
+    if ("DELIVERY_ALERT".equalsIgnoreCase(type)) {
+
+        return "🚚 Delivery Alert";
+    }
+
+    if ("ETA_UPDATE".equalsIgnoreCase(type)) {
+
+        return "⏱️ ETA Update";
+    }
+
+    return "🔔 ShipTrack Pro Notification";
+}
 }

@@ -53,4 +53,13 @@ public class User {
 
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
+
+    @Column(name = "push_endpoint", length = 2000)
+private String pushEndpoint;
+
+@Column(name = "push_p256dh", length = 500)
+private String pushP256dh;
+
+@Column(name = "push_auth", length = 500)
+private String pushAuth;
 }

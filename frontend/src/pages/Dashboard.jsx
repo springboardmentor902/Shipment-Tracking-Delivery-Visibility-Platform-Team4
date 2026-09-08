@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
@@ -9,6 +10,12 @@ import {
     createPackage,
     logoutUser,
 } from "../services/authService";
+
+import {
+    getNotifications,
+    markNotificationAsRead,
+    registerPushSubscription
+} from "../services/notificationService";
 
 function Dashboard() {
 
@@ -27,6 +34,13 @@ function Dashboard() {
     const [shipments, setShipments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    // ========================================
+    // NOTIFICATIONS
+    // ========================================
+
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     // ========================================
     // CREATE SHIPMENT
@@ -61,6 +75,38 @@ function Dashboard() {
     });
 
     // ========================================
+    // LOAD NOTIFICATIONS
+    // ========================================
+
+    const loadNotifications = async () => {
+
+        try {
+
+            const data = await getNotifications();
+
+            console.log(
+                "Notifications received:",
+                data
+            );
+
+            setNotifications(
+                Array.isArray(data)
+                    ? data
+                    : []
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load notifications:",
+                error
+            );
+
+        }
+
+    };
+
+    // ========================================
     // INITIAL LOAD
     // ========================================
 
@@ -75,6 +121,9 @@ function Dashboard() {
 
         setUser(currentUser);
 
+        // Load notifications for logged-in user
+        loadNotifications();
+
         if (
             currentUser.role === "CUSTOMER" ||
             currentUser.role === "BUSINESS_CLIENT" ||
@@ -85,6 +134,19 @@ function Dashboard() {
         } else {
             setLoading(false);
         }
+        registerPushSubscription()
+        .then(() => {
+            console.log(
+                "Push notifications enabled successfully."
+            );
+        })
+        .catch((error) => {
+            console.error(
+                "Push notification setup failed:",
+                error
+            );
+        });
+
 
     }, [navigate]);
 
@@ -131,6 +193,54 @@ function Dashboard() {
         }
 
     };
+
+    // ========================================
+    // MARK NOTIFICATION AS READ
+    // ========================================
+
+    const handleNotificationClick = async (notification) => {
+
+        try {
+
+            if (!notification.read) {
+
+                await markNotificationAsRead(
+                    notification.id
+                );
+
+                setNotifications(previous =>
+                    previous.map(item =>
+                        item.id === notification.id
+                            ? {
+                                ...item,
+                                read: true
+                            }
+                            : item
+                    )
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Failed to mark notification as read:",
+                error
+            );
+
+        }
+
+    };
+
+    // ========================================
+    // UNREAD NOTIFICATION COUNT
+    // ========================================
+
+    const unreadCount =
+        notifications.filter(
+            notification =>
+                !notification.read
+        ).length;
 
     // ========================================
     // SHIPMENT FORM CHANGE
@@ -193,16 +303,16 @@ function Dashboard() {
             const shipmentData = {
 
                 sender:
-                shipmentForm.sender,
+                    shipmentForm.sender,
 
                 receiver:
-                shipmentForm.receiver,
+                    shipmentForm.receiver,
 
                 origin:
-                shipmentForm.origin,
+                    shipmentForm.origin,
 
                 destination:
-                shipmentForm.destination,
+                    shipmentForm.destination,
 
                 currentLocation:
                     shipmentForm.currentLocation ||
@@ -254,10 +364,10 @@ function Dashboard() {
             const packageData = {
 
                 shipmentId:
-                createdShipment.id,
+                    createdShipment.id,
 
                 description:
-                packageForm.description,
+                    packageForm.description,
 
                 weightKg:
                     Number(
@@ -290,7 +400,7 @@ function Dashboard() {
                     ),
 
                 fragile:
-                packageForm.fragile,
+                    packageForm.fragile,
             };
 
             console.log(
@@ -432,6 +542,119 @@ function Dashboard() {
 
                 <div className="user-section">
 
+                    {/* =================================
+                        NOTIFICATION BELL
+                    ================================= */}
+
+                    <div className="notification-container">
+
+                        <button
+                            className="notification-bell"
+                            onClick={() =>
+                                setShowNotifications(
+                                    !showNotifications
+                                )
+                            }
+                        >
+
+                            🔔
+
+                            {unreadCount > 0 && (
+
+                                <span className="notification-badge">
+                                    {unreadCount}
+                                </span>
+
+                            )}
+
+                        </button>
+
+                        {/* =================================
+                            NOTIFICATION DROPDOWN
+                        ================================= */}
+
+                        {showNotifications && (
+
+                            <div className="notification-dropdown">
+
+                                <div className="notification-header">
+
+                                    <strong>
+                                        Notifications
+                                    </strong>
+
+                                </div>
+
+                                {notifications.length === 0 ? (
+
+                                    <p className="no-notifications">
+                                        No notifications
+                                    </p>
+
+                                ) : (
+
+                                    notifications.map(
+                                        notification => (
+
+                                            <div
+                                                key={
+                                                    notification.id
+                                                }
+                                                className={
+                                                    `notification-item ${
+                                                        notification.read
+                                                            ? "read"
+                                                            : "unread"
+                                                    }`
+                                                }
+                                                onClick={() =>
+                                                    handleNotificationClick(
+                                                        notification
+                                                    )
+                                                }
+                                            >
+
+                                                <strong>
+                                                    {
+                                                        notification.notificationType
+                                                    }
+                                                </strong>
+
+                                                <p>
+                                                    {
+                                                        notification.message
+                                                    }
+                                                </p>
+
+                                                {notification.createdAt && (
+
+                                                    <small>
+                                                        {
+                                                            new Date(
+                                                                notification.createdAt
+                                                            ).toLocaleString()
+                                                        }
+                                                    </small>
+
+                                                )}
+
+                                            </div>
+
+                                        )
+                                    )
+
+                                )}
+
+                            </div>
+
+                        )}
+
+                    </div>
+
+                    {/* =================================
+                        USER NAME
+                    ================================= */}
+
                     <span>
 
                         Welcome,{" "}
@@ -444,6 +667,10 @@ function Dashboard() {
                         }
 
                     </span>
+
+                    {/* =================================
+                        LOGOUT
+                    ================================= */}
 
                     <button
                         onClick={
@@ -552,8 +779,6 @@ function Dashboard() {
 
                     </div>
 
-
-
                     {/* =================================
                         SHIPMENT ACTIONS
                     ================================= */}
@@ -573,6 +798,7 @@ function Dashboard() {
                         >
                             View My Shipments
                         </button>
+
                         {(
                             user?.role === "CUSTOMER" ||
                             user?.role === "BUSINESS_CLIENT" ||
@@ -582,12 +808,33 @@ function Dashboard() {
                             <button
                                 onClick={() => {
 
-                                    if (user.role === "CUSTOMER") {
-                                        navigate("/customer/analytics");
-                                    } else if (user.role === "BUSINESS_CLIENT") {
-                                        navigate("/business/analytics");
-                                    } else if (user.role === "ADMINISTRATOR") {
-                                        navigate("/admin/analytics");
+                                    if (
+                                        user.role ===
+                                        "CUSTOMER"
+                                    ) {
+
+                                        navigate(
+                                            "/customer/analytics"
+                                        );
+
+                                    } else if (
+                                        user.role ===
+                                        "BUSINESS_CLIENT"
+                                    ) {
+
+                                        navigate(
+                                            "/business/analytics"
+                                        );
+
+                                    } else if (
+                                        user.role ===
+                                        "ADMINISTRATOR"
+                                    ) {
+
+                                        navigate(
+                                            "/admin/analytics"
+                                        );
+
                                     }
 
                                 }}
@@ -615,7 +862,6 @@ function Dashboard() {
                                 >
                                     + Create Shipment
                                 </button>
-
 
                             )}
 
@@ -1045,6 +1291,7 @@ function Dashboard() {
         </div>
 
     );
+
 }
 
 export default Dashboard;

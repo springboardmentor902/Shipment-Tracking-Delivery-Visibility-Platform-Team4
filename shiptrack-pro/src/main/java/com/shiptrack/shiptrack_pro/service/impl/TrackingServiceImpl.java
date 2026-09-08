@@ -8,6 +8,7 @@ import com.shiptrack.shiptrack_pro.entity.TrackingEvent;
 import com.shiptrack.shiptrack_pro.repository.ShipmentRepository;
 import com.shiptrack.shiptrack_pro.repository.TrackingEventRepository;
 import com.shiptrack.shiptrack_pro.service.TrackingService;
+import com.shiptrack.shiptrack_pro.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class TrackingServiceImpl implements TrackingService {
 
     private final TrackingEventRepository trackingEventRepository;
     private final ShipmentRepository shipmentRepository;
-
+    private final NotificationService notificationService;
 
     // =========================================================
     // CREATE TRACKING EVENT
@@ -125,8 +126,11 @@ public class TrackingServiceImpl implements TrackingService {
 
         TrackingEvent savedEvent =
                 trackingEventRepository.save(event);
-
-
+                notificationService.send(
+                "SHIPMENT_UPDATE",
+                shipment.getUser(),
+                shipment
+        );
         // -----------------------------------------------------
         // Synchronize shipment status
         // -----------------------------------------------------

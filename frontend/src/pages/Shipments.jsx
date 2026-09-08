@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
-
+import { getETAPrediction } from "../services/etaService";
 import {
     getCurrentUser,
     getShipments,
@@ -13,6 +13,7 @@ function Shipments() {
 
     const [user, setUser] = useState(null);
     const [shipments, setShipments] = useState([]);
+    const [etaPredictions, setEtaPredictions] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -41,11 +42,38 @@ function Shipments() {
 
             console.log("Shipments received:", data);
 
-            setShipments(
-                Array.isArray(data)
-                    ? data
-                    : []
+            const shipmentList = Array.isArray(data)
+    ? data
+    : [];
+
+setShipments(shipmentList);
+
+const etaResults = {};
+
+await Promise.all(
+    shipmentList.map(async (shipment) => {
+
+        try {
+
+            const eta = await getETAPrediction(
+                shipment.id
             );
+
+            etaResults[shipment.id] = eta;
+
+        } catch (etaError) {
+
+            console.error(
+                `ETA fetch failed for shipment ${shipment.id}:`,
+                etaError
+            );
+
+        }
+
+    })
+);
+
+setEtaPredictions(etaResults);
 
         } catch (error) {
 
