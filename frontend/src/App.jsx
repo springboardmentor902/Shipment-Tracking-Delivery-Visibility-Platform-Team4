@@ -12,6 +12,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ShipmentDetail from "./pages/ShipmentDetail";
 import Shipments from "./pages/Shipments";
+import ReportsExport from "./pages/ReportsExport";
 function ProtectedRoute({ children }) {
 
     const token = localStorage.getItem("token");
@@ -83,6 +84,17 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <ShipmentDetail />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* REPORTS & EXPORT */}
+
+                <Route
+                    path="/reports-export"
+                    element={
+                        <ProtectedRoute>
+                            <ReportsExport />
                         </ProtectedRoute>
                     }
                 />

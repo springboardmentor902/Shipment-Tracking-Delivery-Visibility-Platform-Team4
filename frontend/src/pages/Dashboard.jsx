@@ -572,6 +572,16 @@ function Dashboard() {
                             View My Shipments
                         </button>
 
+                        <button
+                            onClick={() =>
+                                navigate(
+                                    "/reports-export"
+                                )
+                            }
+                        >
+                            Reports & Export
+                        </button>
+
                         {user?.role ===
                             "BUSINESS_CLIENT" && (
 
