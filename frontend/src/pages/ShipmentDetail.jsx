@@ -13,6 +13,7 @@ import {
 } from "../services/authService";
 
 import "./ShipmentDetail.css";
+import ShipmentMap from "../components/ShipmentMap";
 
 
 function ShipmentDetail() {
@@ -932,6 +933,14 @@ function ShipmentDetail() {
                             </div>
 
                         </div>
+                        {/* =================================
+    MAP
+================================= */}
+
+<div className="shipment-detail-card">
+    <h2>Shipment Location</h2>
+    <ShipmentMap />
+</div>
                         {/* =================================
     ETA & DELAY RISK
 ================================= */}
