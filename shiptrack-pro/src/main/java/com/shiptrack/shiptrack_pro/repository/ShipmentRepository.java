@@ -49,4 +49,11 @@ public interface ShipmentRepository
     List<Shipment> findByStatusIn(
             List<ShipmentStatus> statuses
     );
+
+
+    // Used by ReportService — Shipment/Delivery reports scoped to one user
+    List<Shipment> findByUserIdAndStatus(
+            Long userId,
+            ShipmentStatus status
+    );
 }

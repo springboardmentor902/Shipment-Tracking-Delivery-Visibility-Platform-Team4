@@ -34,6 +34,7 @@ public class SecurityConfig {
         // ✅ Allow ALL origins for development (or specify your frontend URLs)
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
+                "http://localhost:5173",
                 "http://localhost:5178",
                 "http://localhost:5179",
                 "http://localhost:5160"
