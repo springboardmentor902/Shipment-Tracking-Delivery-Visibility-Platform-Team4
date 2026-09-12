@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -71,15 +72,19 @@ public class ProofOfDeliveryServiceImpl
                             .photoUrl(photoUrl)
                             .deliveredTo(request.getDeliveredTo())
                             .deliveryNotes(request.getDeliveryNotes())
-                            .verificationStatus("VERIFIED")
-                            .verifiedBy(userEmail)
+
+                            // New POD waits for Support/Admin verification
+                            .verificationStatus("PENDING")
+                            .verifiedBy(null)
+                            .rejectionReason(null)
+
                             .deliveredAt(LocalDateTime.now())
                             .build();
 
             ProofOfDelivery saved =
                     podRepository.save(pod);
 
-            // Update shipment automatically
+            // Shipment is delivered after POD submission
             shipment.setStatus(ShipmentStatus.DELIVERED);
             shipmentRepository.save(shipment);
 
@@ -109,6 +114,62 @@ public class ProofOfDeliveryServiceImpl
                         );
 
         return mapToResponse(pod);
+    }
+
+    @Override
+    public List<ProofOfDeliveryResponse>
+    getPendingProofsOfDelivery() {
+
+        return podRepository
+                .findByVerificationStatus("PENDING")
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    public ProofOfDeliveryResponse verifyProofOfDelivery(
+            Long shipmentId,
+            boolean verified,
+            String rejectionReason,
+            String verifierEmail) {
+
+        ProofOfDelivery pod =
+                podRepository.findByShipmentId(shipmentId)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Proof of Delivery not found for shipment: "
+                                                + shipmentId
+                                )
+                        );
+
+        if (verified) {
+
+            pod.setVerificationStatus("VERIFIED");
+            pod.setVerifiedBy(verifierEmail);
+            pod.setRejectionReason(null);
+
+        } else {
+
+            if (rejectionReason == null ||
+                    rejectionReason.trim().isEmpty()) {
+
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Rejection reason is required."
+                );
+            }
+
+            pod.setVerificationStatus("REJECTED");
+            pod.setVerifiedBy(verifierEmail);
+            pod.setRejectionReason(rejectionReason);
+        }
+
+        ProofOfDelivery saved =
+                podRepository.save(pod);
+
+        return mapToResponse(saved);
     }
 
     private String saveFile(
@@ -158,34 +219,48 @@ public class ProofOfDeliveryServiceImpl
 
         return ProofOfDeliveryResponse.builder()
                 .id(pod.getId())
+
                 .shipmentId(
                         pod.getShipment().getId()
                 )
+
                 .trackingNumber(
                         pod.getShipment()
                                 .getTrackingNumber()
                 )
+
                 .signatureUrl(
                         pod.getSignatureUrl()
                 )
+
                 .photoUrl(
                         pod.getPhotoUrl()
                 )
+
                 .deliveredTo(
                         pod.getDeliveredTo()
                 )
+
                 .deliveryNotes(
                         pod.getDeliveryNotes()
                 )
+
                 .verificationStatus(
                         pod.getVerificationStatus()
                 )
+
                 .verifiedBy(
                         pod.getVerifiedBy()
                 )
+
+                .rejectionReason(
+                        pod.getRejectionReason()
+                )
+
                 .deliveredAt(
                         pod.getDeliveredAt()
                 )
+
                 .build();
     }
 }

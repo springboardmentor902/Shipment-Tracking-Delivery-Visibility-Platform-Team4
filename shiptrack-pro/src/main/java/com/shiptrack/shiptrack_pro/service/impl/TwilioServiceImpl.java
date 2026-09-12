@@ -13,43 +13,44 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TwilioServiceImpl implements TwilioService {
 
-    @Value("${twilio.account-sid}")
+    @Value("${twilio.account-sid:}")
     private String accountSid;
 
-    @Value("${twilio.auth-token}")
+    @Value("${twilio.auth-token:}")
     private String authToken;
 
-    @Value("${twilio.phone-number}")
+    @Value("${twilio.phone-number:}")
     private String fromPhoneNumber;
 
     @PostConstruct
     public void initializeTwilio() {
 
-        if (accountSid == null || accountSid.startsWith("YOUR_")
-                || authToken == null || authToken.startsWith("YOUR_")) {
+        if (accountSid.isBlank()
+                || authToken.isBlank()
+                || fromPhoneNumber.isBlank()
+                || accountSid.startsWith("YOUR_")
+                || authToken.startsWith("YOUR_")
+                || fromPhoneNumber.startsWith("YOUR_")) {
 
-            System.out.println(
-                    "Twilio not configured. SMS notifications disabled."
-            );
-
+            System.out.println("Twilio not configured. SMS notifications disabled.");
             return;
         }
 
         Twilio.init(accountSid, authToken);
+        System.out.println("Twilio initialized successfully.");
     }
 
     @Override
     public void sendSms(String to, String message) {
 
-        if (accountSid == null || accountSid.startsWith("YOUR_")
-                || authToken == null || authToken.startsWith("YOUR_")
-                || fromPhoneNumber == null
+        if (accountSid.isBlank()
+                || authToken.isBlank()
+                || fromPhoneNumber.isBlank()
+                || accountSid.startsWith("YOUR_")
+                || authToken.startsWith("YOUR_")
                 || fromPhoneNumber.startsWith("YOUR_")) {
 
-            System.out.println(
-                    "Twilio not configured. Skipping SMS."
-            );
-
+            System.out.println("Twilio not configured. Skipping SMS.");
             return;
         }
 

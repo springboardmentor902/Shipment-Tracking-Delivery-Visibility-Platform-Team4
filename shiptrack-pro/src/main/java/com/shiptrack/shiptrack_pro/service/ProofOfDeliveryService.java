@@ -4,6 +4,8 @@ import com.shiptrack.shiptrack_pro.dto.ProofOfDeliveryRequest;
 import com.shiptrack.shiptrack_pro.dto.ProofOfDeliveryResponse;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 public interface ProofOfDeliveryService {
 
     ProofOfDeliveryResponse createProofOfDelivery(
@@ -15,4 +17,13 @@ public interface ProofOfDeliveryService {
     );
 
     ProofOfDeliveryResponse getProofOfDelivery(Long shipmentId);
+
+    List<ProofOfDeliveryResponse> getPendingProofsOfDelivery();
+
+    ProofOfDeliveryResponse verifyProofOfDelivery(
+            Long shipmentId,
+            boolean verified,
+            String rejectionReason,
+            String verifierEmail
+    );
 }

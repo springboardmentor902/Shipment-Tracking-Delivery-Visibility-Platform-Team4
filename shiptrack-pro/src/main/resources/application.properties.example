@@ -15,7 +15,7 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 
 # ✅ JWT Configuration
-jwt.secret=ShipTrackProSuperSecretKeyForJWTSigningMustBeAtLeast256BitsLong
+jwt.secret=ShipTrackProJwtSecretKeyForDevelopment2026SecureKey123456789
 jwt.expiration=86400000
 
 # ✅ Logging (for debugging)

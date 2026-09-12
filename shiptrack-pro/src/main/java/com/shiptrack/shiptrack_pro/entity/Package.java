@@ -1,5 +1,5 @@
 package com.shiptrack.shiptrack_pro.entity;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,6 +21,7 @@ public class Package {
             name = "shipment_id",
             nullable = false
     )
+    @JsonIgnore
     private Shipment shipment;
 
     @Column(nullable = false)

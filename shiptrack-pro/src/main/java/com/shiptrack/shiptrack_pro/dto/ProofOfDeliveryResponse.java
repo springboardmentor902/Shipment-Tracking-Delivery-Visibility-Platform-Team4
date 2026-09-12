@@ -10,22 +10,18 @@ import java.time.LocalDateTime;
 public class ProofOfDeliveryResponse {
 
     private Long id;
-
     private Long shipmentId;
-
     private String trackingNumber;
 
     private String signatureUrl;
-
     private String photoUrl;
 
     private String deliveredTo;
-
     private String deliveryNotes;
 
     private String verificationStatus;
-
     private String verifiedBy;
+    private String rejectionReason;
 
     private LocalDateTime deliveredAt;
 }

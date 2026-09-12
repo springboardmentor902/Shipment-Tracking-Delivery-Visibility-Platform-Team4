@@ -11,7 +11,10 @@ import {
     getETAPrediction,
     predictETA,
 } from "../services/authService";
-
+import {
+    getProofOfDelivery,
+    createProofOfDelivery
+} from "../services/podService";
 import "./ShipmentDetail.css";
 import ShipmentMap from "../components/ShipmentMap";
 
@@ -96,7 +99,30 @@ function ShipmentDetail() {
 
     const [trackingError, setTrackingError] =
         useState("");
+        // ========================================
+// PROOF OF DELIVERY
+// ========================================
 
+const [pod, setPod] = useState(null);
+
+const [podLoading, setPodLoading] =
+    useState(false);
+
+const [podError, setPodError] =
+    useState("");
+const [podFile, setPodFile] = useState(null);
+
+const [deliveredTo, setDeliveredTo] =
+    useState("");
+
+const [deliveryNotes, setDeliveryNotes] =
+    useState("");
+
+const [submittingPod, setSubmittingPod] =
+    useState(false);
+
+const [podSuccess, setPodSuccess] =
+    useState("");
     const [showTrackingForm, setShowTrackingForm] =
         useState(false);
 
@@ -153,6 +179,117 @@ function ShipmentDetail() {
 
         }
     };
+    // ========================================
+// SUBMIT PROOF OF DELIVERY
+// ========================================
+
+const handleSubmitPOD = async (event) => {
+
+    event.preventDefault();
+
+    if (!podFile) {
+        setPodError("Please select a delivery proof file.");
+        return;
+    }
+
+    if (!deliveredTo.trim()) {
+        setPodError(
+            "Please enter the name of the person who received the shipment."
+        );
+        return;
+    }
+
+    try {
+
+        setSubmittingPod(true);
+        setPodError("");
+        setPodSuccess("");
+
+        const result = await createProofOfDelivery(
+            id,
+            deliveredTo.trim(),
+            deliveryNotes.trim(),
+            null,
+            podFile
+        );
+
+        console.log("POD submitted:", result);
+
+        setPod(result);
+
+        setPodSuccess(
+            "Proof of Delivery submitted successfully."
+        );
+
+        setPodFile(null);
+        setDeliveredTo("");
+        setDeliveryNotes("");
+
+    } catch (err) {
+
+        console.error(
+            "POD submission error:",
+            err
+        );
+
+        setPodError(
+            err.message ||
+            "Failed to submit Proof of Delivery"
+        );
+
+    } finally {
+
+        setSubmittingPod(false);
+
+    }
+};
+    // ========================================
+// LOAD PROOF OF DELIVERY
+// ========================================
+
+const loadProofOfDelivery = async () => {
+
+    try {
+
+        setPodLoading(true);
+        setPodError("");
+
+        const data =
+            await getProofOfDelivery(id);
+
+        console.log(
+            "Proof of Delivery:",
+            data
+        );
+
+        setPod(data);
+
+    } catch (err) {
+
+        console.error(
+            "POD loading error:",
+            err
+        );
+
+        setPod(null);
+
+        // A missing POD is normal for a shipment
+        // that has not had proof submitted yet.
+        if (
+            !err.message?.toLowerCase().includes("not found")
+        ) {
+            setPodError(
+                err.message ||
+                "Failed to load Proof of Delivery"
+            );
+        }
+
+    } finally {
+
+        setPodLoading(false);
+
+    }
+};
 
 
     // ========================================
@@ -168,8 +305,9 @@ function ShipmentDetail() {
         }
 
         loadShipment();
-        loadTrackingEvents();
-        loadETAPrediction();
+loadTrackingEvents();
+loadETAPrediction();
+loadProofOfDelivery();
 
     }, [id, navigate]);
     // ========================================
@@ -1068,6 +1206,205 @@ function ShipmentDetail() {
                             )}
 
                         </div>
+                                                {/* =================================
+                            PROOF OF DELIVERY
+                        ================================= */}
+
+                        <div className="shipment-detail-card pod-card">
+
+                            <div className="pod-header">
+
+                                <div>
+                                    <h2>
+                                        Proof of Delivery
+                                    </h2>
+
+                                    <p>
+                                        Delivery confirmation and proof
+                                    </p>
+                                </div>
+
+                            </div>
+
+
+                            {podLoading ? (
+
+                                <div className="pod-loading">
+                                    Loading Proof of Delivery...
+                                </div>
+
+                            ) : podError ? (
+
+                                <div className="detail-error">
+                                    {podError}
+                                </div>
+
+                            ) : pod ? (
+
+                                <div className="pod-content">
+
+                                    {/* VERIFICATION STATUS */}
+
+                                    <div className="pod-status-section">
+
+                                        <span className="detail-label">
+                                            Verification Status
+                                        </span>
+
+                                        <strong
+                                            className={
+                                                `pod-status pod-status-${String(
+                                                    pod.verificationStatus || ""
+                                                ).toLowerCase()}`
+                                            }
+                                        >
+                                            {
+                                                pod.verificationStatus ||
+                                                "PENDING"
+                                            }
+                                        </strong>
+
+                                    </div>
+
+
+                                    {/* DELIVERY INFORMATION */}
+
+                                    <div className="detail-grid">
+
+                                        <div className="detail-item">
+
+                                            <span>
+                                                Delivered To
+                                            </span>
+
+                                            <strong>
+                                                {
+                                                    pod.deliveredTo ||
+                                                    "Not available"
+                                                }
+                                            </strong>
+
+                                        </div>
+
+
+                                        <div className="detail-item">
+
+                                            <span>
+                                                Delivered At
+                                            </span>
+
+                                            <strong>
+                                                {
+                                                    pod.deliveredAt
+                                                        ? new Date(
+                                                            pod.deliveredAt
+                                                        ).toLocaleString()
+                                                        : "Not available"
+                                                }
+                                            </strong>
+
+                                        </div>
+
+
+                                        {pod.verifiedBy && (
+
+                                            <div className="detail-item">
+
+                                                <span>
+                                                    Verified By
+                                                </span>
+
+                                                <strong>
+                                                    {
+                                                        pod.verifiedBy
+                                                    }
+                                                </strong>
+
+                                            </div>
+
+                                        )}
+
+                                    </div>
+
+
+                                    {/* DELIVERY NOTES */}
+
+                                    {pod.deliveryNotes && (
+
+                                        <div className="pod-notes">
+
+                                            <span className="detail-label">
+                                                Delivery Notes
+                                            </span>
+
+                                            <p>
+                                                {
+                                                    pod.deliveryNotes
+                                                }
+                                            </p>
+
+                                        </div>
+
+                                    )}
+
+
+                                    {/* PHOTO */}
+
+                                    {pod.photoUrl && (
+
+                                        <div className="pod-proof">
+
+                                            <h3>
+                                                Delivery Photo
+                                            </h3>
+
+                                            <img
+                                                src={pod.photoUrl}
+                                                alt="Proof of Delivery"
+                                                className="pod-photo"
+                                            />
+
+                                        </div>
+
+                                    )}
+
+
+                                    {/* SIGNATURE */}
+
+                                    {pod.signatureUrl && (
+
+                                        <div className="pod-proof">
+
+                                            <h3>
+                                                Delivery Signature
+                                            </h3>
+
+                                            <img
+                                                src={pod.signatureUrl}
+                                                alt="Delivery Signature"
+                                                className="pod-signature"
+                                            />
+
+                                        </div>
+
+                                    )}
+
+                                </div>
+
+                            ) : (
+
+                                <div className="pod-empty">
+
+                                    {shipment.status === "DELIVERED"
+                                        ? "No Proof of Delivery has been submitted yet."
+                                        : "Proof of Delivery will appear after the shipment is delivered."}
+
+                                </div>
+
+                            )}
+
+                        </div>
+
 
 
                         {/* =================================

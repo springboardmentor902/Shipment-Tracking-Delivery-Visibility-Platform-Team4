@@ -10,36 +10,50 @@ import java.util.Optional;
 public interface ShipmentRepository
         extends JpaRepository<Shipment, Long> {
 
+
     Optional<Shipment> findByTrackingNumber(
             String trackingNumber
     );
 
+
     boolean existsByTrackingNumber(
             String trackingNumber
     );
+
 
     // Customer / Business Client
     List<Shipment> findByUserId(
             Long userId
     );
 
+
     Optional<Shipment> findByIdAndUserId(
             Long id,
             Long userId
     );
+
 
     // Logistics Operator
     List<Shipment> findByAssignedOperatorId(
             Long operatorId
     );
 
+
     Optional<Shipment> findByIdAndAssignedOperatorId(
             Long id,
             Long operatorId
     );
 
-    // ETA Scheduler
+
+    // Used by ETASchedulerService to find active shipments
     List<Shipment> findByStatusIn(
             List<ShipmentStatus> statuses
+    );
+
+
+    // Used by ReportService — Shipment/Delivery reports scoped to one user
+    List<Shipment> findByUserIdAndStatus(
+            Long userId,
+            ShipmentStatus status
     );
 }

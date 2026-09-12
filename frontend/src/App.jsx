@@ -6,15 +6,20 @@ import {
     Route,
     Navigate
 } from "react-router-dom";
-
+import UserManagement from "./pages/UserManagement";
 import Login from "./pages/Login";
+import AccountSettings from "./pages/AccountSettings";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ShipmentDetail from "./pages/ShipmentDetail";
 import Shipments from "./pages/Shipments";
+import ReportsExport from "./pages/ReportsExport";
 import CustomerAnalytics from "./pages/CustomerAnalytics";
 import BusinessAnalytics from "./pages/BusinessAnalytics";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import PODVerification from "./pages/PODVerification";
+import Profile from "./pages/Profile";
+import RouteOptimization from "./pages/RouteOptimization";
 function ProtectedRoute({ children }) {
 
     const token = localStorage.getItem("token");
@@ -78,6 +83,10 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+    path="/settings"
+    element={<AccountSettings />}
+/>
 
                 {/* SHIPMENT DETAILS */}
 
@@ -115,7 +124,44 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+    path="/pod-verification"
+    element={
+        <ProtectedRoute>
+            <PODVerification />
+        </ProtectedRoute>
+    }
+/>
+<Route
+    path="/user-management"
+    element={<UserManagement />}
+/>
+                <Route
+    path="/admin/users"
+    element={
+        <ProtectedRoute>
+            <UserManagement />
+        </ProtectedRoute>
+    }
+/>
+<Route path="/profile" element={<Profile />} />
 
+<Route
+    path="/reports-export"
+    element={
+        <ProtectedRoute>
+            <ReportsExport />
+        </ProtectedRoute>
+    }
+/>
+<Route
+    path="/route-optimization"
+    element={
+        <ProtectedRoute>
+            <RouteOptimization />
+        </ProtectedRoute>
+    }
+/>
 
             </Routes>
 
